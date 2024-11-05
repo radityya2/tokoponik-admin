@@ -12,7 +12,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Barlow', ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 // Warna Utama
@@ -25,14 +25,14 @@ export default {
                     100: '#BCF0DA',  // Hijau Pastel Utama
                     200: '#98E5C9',
                     300: '#74DAB7',
-                    400: '#50CFA6',
+                    400: '#7CE2B7',
                 },
 
                 // Hijau Tua
                 'forest': {
                     500: '#2D5A45',  // Hijau Tua Medium
                     600: '#224433',  // Hijau Tua
-                    700: '#1A332B',  // Hijau Tua Gelap
+                    700: '#006838',  // Hijau Tua Gelap
                     800: '#132A20',
                     900: '#0C1F17',
                 },

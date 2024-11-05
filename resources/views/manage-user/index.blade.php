@@ -9,65 +9,63 @@
 
         <!-- Main Content -->
         <div class="flex-1 p-8 bg-pastel-50">
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-semibold text-forest-600">All users</h1>
+            <!-- Header dengan spacing yang lebih baik -->
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-forest-700">All Users</h1>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center space-x-6">
                     <input type="text"
                         id="searchInput"
                         placeholder="Search for users"
                         onkeyup="searchUsers()"
-                        class="bg-white border border-pastel-200 text-forest-600 px-4 py-2 rounded-lg focus:outline-none focus:border-forest-500">
+                        class="bg-white border border-pastel-200 text-forest-600 px-5 py-2.5 rounded-lg focus:outline-none focus:border-forest-500 focus:ring-2 focus:ring-forest-200 transition-all duration-200">
 
                     <a href="{{ route('user.create') }}">
-                        <button class="bg-forest-600 hover:bg-forest-500 text-white px-4 py-2 rounded-lg">
+                        <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-lg transition duration-200 font-medium shadow-sm hover:shadow-md">
                             Add new user
                         </button>
                     </a>
                 </div>
             </div>
 
-            <!-- Table (Hijau Muda) -->
-            <div class="bg-white rounded-lg shadow-md">
-                <table class="w-full">
+            <!-- Table dengan shadow dan border yang lebih halus -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <table id="userTable" class="w-full">
                     <thead>
-                        <tr class="bg-pastel-100 text-forest-600">
-                            <th class="py-3 px-6 text-left">No</th>
-                            <th class="py-3 px-6 text-left">Name</th>
-                            <th class="py-3 px-6 text-left">Username</th>
-                            <th class="py-3 px-6 text-left">Phone Number</th>
-                            <th class="py-3 px-6 text-left">Role</th>
-                            <th class="py-3 px-6 text-left">Action</th>
+                        <tr class="bg-forest-500 text-white">
+                            <th class="py-4 px-6 text-left font-medium">No</th>
+                            <th class="py-4 px-6 text-left font-medium">Name</th>
+                            <th class="py-4 px-6 text-left font-medium">Username</th>
+                            <th class="py-4 px-6 text-left font-medium">Phone Number</th>
+                            <th class="py-4 px-6 text-left font-medium">Role</th>
+                            <th class="py-4 px-6 text-left font-medium">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="userTableBody">
+                    <tbody id="userTableBody" class="divide-y divide-gray-100">
                         @if ($users->count() != 0)
                             @foreach ($users as $u)
-                            <tr class="border-b border-pastel-50 hover:bg-pastel-50">
-                                <td class="py-3 px-6">{{ $loop->iteration }}</td>
-                                <td class="py-3 px-6">{{ $u->name }}</td>
-                                <td class="py-3 px-6">{{ $u->username }}</td>
-                                <td class="py-3 px-6">{{ '+62 ' . ltrim($u->phone_number, '0') }}</td>
-                                <td class="py-3 px-6">{{ $u->role }}</td>
-                                <td class="py-3 px-6">
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('address.index', $u->id) }}">
-                                            <button class="bg-action-info hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+                                <td class="py-4 px-6">{{ $loop->iteration }}</td>
+                                <td class="py-4 px-6">{{ $u->name }}</td>
+                                <td class="py-4 px-6">{{ $u->username }}</td>
+                                <td class="py-4 px-6">{{ '+62 ' . ltrim($u->phone_number, '0') }}</td>
+                                <td class="py-4 px-6">{{ $u->role }}</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center space-x-3">
+                                        <a href="{{ route('address.index', $u->id) }}" class="tooltip" title="View Address">
+                                            <button class="bg-forest-600 hover:bg-forest-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
                                                 Address
                                             </button>
                                         </a>
-                                        <a href="{{ route('user.edit', $u->id) }}">
-                                            <button class="bg-action-warning hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                        <a href="{{ route('user.edit', $u->id) }}" class="tooltip" title="Edit User">
+                                            <button class="bg-forest-500 hover:bg-forest-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
                                                 Update
                                             </button>
-
-
                                         </a>
-                                        <a href="{{ route('user.destroy', $u->id) }}">
-                                            <button class="bg-action-danger hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200"
+                                        <a href="{{ route('user.destroy', $u->id) }}" class="tooltip" title="Delete User">
+                                            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium"
                                                     onClick="return confirm('Ingin hapus user?')">
-                                                Delete item
+                                                Delete
                                             </button>
                                         </a>
                                     </div>
@@ -76,7 +74,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-gray-500">Tidak ada data</td>
+                                <td colspan="6" class="text-center py-8 text-gray-500">Tidak ada data</td>
                             </tr>
                         @endif
                     </tbody>

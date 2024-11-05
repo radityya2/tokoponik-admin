@@ -6,6 +6,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\BankController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -48,4 +50,22 @@ Route::prefix('blog')->group(function () {
     Route::get('/edit/{id}', [BlogController::class, 'edit'])->name('blog.edit');
     Route::put('/update/{id}', [BlogController::class, 'update'])->name('blog.update');
     Route::get('/destroy/{id}', [BlogController::class, 'destroy'])->name('blog.destroy');
+});
+
+Route::prefix('transaction')->group(function () {
+    Route::get('/', [TransactionController::class, 'index'])->name('transaction.index');
+    Route::get('/create', [TransactionController::class, 'create'])->name('transaction.create');
+    Route::post('/store', [TransactionController::class, 'store'])->name('transaction.store');
+    Route::get('/edit/{id}', [TransactionController::class, 'edit'])->name('transaction.edit');
+    Route::put('/update/{id}', [TransactionController::class, 'update'])->name('transaction.update');
+    Route::get('/destroy/{id}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
+});
+
+Route::prefix('bank')->group(function () {
+    Route::get('/', [BankController::class, 'index'])->name('bank.index');
+    Route::get('/create', [BankController::class, 'create'])->name('bank.create');
+    Route::post('/store', [BankController::class, 'store'])->name('bank.store');
+    Route::get('/edit/{id}', [BankController::class, 'edit'])->name('bank.edit');
+    Route::put('/update/{id}', [BankController::class, 'update'])->name('bank.update');
+    Route::get('/destroy/{id}', [BankController::class, 'destroy'])->name('bank.destroy');
 });

@@ -6,10 +6,11 @@
     <title>Admin Dashboard</title>
     @vite('resources/css/app.css')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-gray-100">
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 bg-green-600 text-white transition-transform duration-300 z-50">
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 bg-green-700 text-white transition-transform duration-300 z-50">
         <!-- Logo -->
         <div class="flex items-center gap-3 p-5 mb-6">
             <div class="bg-white p-2 rounded-lg">
@@ -25,30 +26,44 @@
 
         <!-- Navigation -->
         <nav class="px-3">
+            <!-- Dashboard -->
             <div class="mb-4">
-            <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-green-700 {{ request()->routeIs('dashboard') ? 'bg-green-700' : '' }}">
-                        <i class="bi bi-grid text-xl"></i>
-                        <span>Dashboard</span>
-                    </a>
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-pastel-400 hover:bg-opacity-50 {{ request()->routeIs('dashboard') ? 'bg-pastel-400 bg-opacity-50' : '' }}">
+                    <i class="bi bi-grid text-xl"></i>
+                    <span>Dashboard</span>
+                </a>
             </div>
+
             <!-- eCommerce Section -->
             <div class="mb-4">
                 <p class="px-3 py-2 text-sm text-green-100">eCommerce</p>
-                <a href="{{ route('product.index') }}"
-                   class="flex items-center gap-3 p-3 rounded-lg hover:bg-green-700 {{ request()->routeIs('product.*') ? 'bg-green-700' : '' }}">
-                    <i class="bi bi-box text-xl"></i>
+
+                <!-- Products -->
+                <a href="{{ route('product.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-pastel-400 hover:bg-opacity-50 {{ request()->routeIs('product.*') ? 'bg-pastel-400 bg-opacity-50' : '' }} mb-2">
+                    <i class="bi bi-box-seam text-xl"></i>
                     <span>Products</span>
                 </a>
-                <a href="{{ route('user.index') }}"
-                   class="flex items-center gap-3 p-3 rounded-lg hover:bg-green-700 {{ request()->routeIs('user.*') ? 'bg-green-700' : '' }}">
+
+                <!-- Users -->
+                <a href="{{ route('user.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-pastel-400 hover:bg-opacity-50 {{ request()->routeIs('user.*') ? 'bg-pastel-400 bg-opacity-50' : '' }} mb-2">
                     <i class="bi bi-people text-xl"></i>
                     <span>Users</span>
                 </a>
-                <a href="{{ route('blog.index') }}"
-                   class="flex items-center gap-3 p-3 rounded-lg hover:bg-green-700 {{ request()->routeIs('blog.*') ? 'bg-green-700' : '' }}">
-                    <i class="bi bi-file-text text-xl"></i>
+
+                <!-- Blog -->
+                <a href="{{ route('blog.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-pastel-400 hover:bg-opacity-50 {{ request()->routeIs('blog.*') ? 'bg-pastel-400 bg-opacity-50' : '' }} mb-2">
+                    <i class="bi bi-file-earmark-text text-xl"></i>
                     <span>Blog</span>
+                </a>
+
+                <a href="{{ route('transaction.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-pastel-400 hover:bg-opacity-50 {{ request()->routeIs('transaction.*') ? 'bg-pastel-400 bg-opacity-50' : '' }} mb-2">
+                    <i class="bi bi-receipt-cutoff text-xl"></i>
+                    <span>Transaction</span>
+                </a>
+
+                <a href="{{ route('bank.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-pastel-400 hover:bg-opacity-50 {{ request()->routeIs('bank.*') ? 'bg-pastel-400 bg-opacity-50' : '' }} mb-2">
+                    <i class="bi bi-credit-card text-xl"></i>
+                    <span>Bank Account</span>
                 </a>
             </div>
         </nav>
@@ -66,7 +81,7 @@
             <!-- Right Navigation Items -->
             <div class="flex items-center gap-4">
                 <button class="p-2 hover:bg-gray-100 rounded-full">
-                    <i class="bi bi-box-arrow-right text-xl"></i>
+                    <i class="bi bi-door-open text-xl"></i>
                 </button>
                 <div class="flex items-center gap-3">
                     <div class="text-right">
