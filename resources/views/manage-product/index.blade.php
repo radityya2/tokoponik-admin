@@ -65,8 +65,8 @@
                             <td class="py-4 px-6 text-sm">{{ $p->description }}</td>
                             <td class="py-4 px-6 text-sm">
                                 <span class="px-3 py-1 rounded-full text-xs font-medium
-                                    {{ $p->type === 'vegetable' ? 'bg-emerald-100 text-emerald-700' :
-                                       ($p->type === 'seed' ? 'bg-blue-100 text-blue-700' :
+                                    {{ strtolower($p->type) === 'vegetable' ? 'bg-emerald-100 text-emerald-700' :
+                                       (strtolower($p->type) === 'seed' ? 'bg-blue-100 text-blue-700' :
                                        'bg-amber-100 text-amber-700') }}">
                                     {{ $p->type }}
                                 </span>
@@ -74,7 +74,7 @@
                             <td class="py-4 px-6">
                                 <div class="flex items-center space-x-4">
                                     <a href="{{ route('product.edit', $p->id) }}"
-                                       class="text-forest-500 hover:text-forest-500 transition duration-200"
+                                       class="text-forest-500 hover:text-yellow-500 transition duration-200"
                                        title="Edit Product">
                                         <i class="bi bi-pencil-square text-xl"></i>
                                     </a>
@@ -91,7 +91,7 @@
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="6" class="text-center py-8 text-gray-500 bg-gray-50">Tidak ada data</td>
+                            <td colspan="6" class="text-center py-8 text-gray-500 bg-gray-50">No data exists</td>
                         </tr>
                     @endif
                 </tbody>

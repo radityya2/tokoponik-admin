@@ -50,7 +50,7 @@ class BlogController extends Controller
 
         $blog->save();
 
-        return redirect()->route('manage-blog.index')
+        return redirect()->route('blog.index')
             ->with('success', 'Blog berhasil dibuat!');
     }
 
@@ -65,8 +65,9 @@ class BlogController extends Controller
     /**
      * Menampilkan form untuk mengedit blog
      */
-    public function edit(Blog $blog)
+    public function edit($id)
     {
+        $blog = Blog::findOrFail($id);
         return view('manage-blog.edit', compact('blog'));
     }
 
@@ -100,7 +101,7 @@ class BlogController extends Controller
 
         $blog->save();
 
-        return redirect()->route('manage-blog.index')
+        return redirect()->route('blog.index')
             ->with('success', 'Blog berhasil diperbarui!');
     }
 
@@ -115,7 +116,7 @@ class BlogController extends Controller
 
         $blog->delete();
 
-        return redirect()->route('manage-blog.index')
+        return redirect()->route('blog.index')
             ->with('success', 'Blog berhasil dihapus!');
     }
 }

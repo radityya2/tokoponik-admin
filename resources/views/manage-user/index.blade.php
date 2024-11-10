@@ -52,21 +52,21 @@
                                 <td class="py-4 px-6">{{ $u->role }}</td>
                                 <td class="py-4 px-6">
                                     <div class="flex items-center space-x-3">
-                                        <a href="{{ route('address.index', $u->id) }}" class="tooltip" title="View Address">
-                                            <button class="bg-forest-600 hover:bg-forest-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
-                                                Address
-                                            </button>
+                                        <a href="{{ route('address.index', $u->id) }}" class="text-blue-500 hover:text-blue-800 transition duration-200" title="View Address">
+                                            <i class="bi bi-house-gear-fill text-xl"></i>
                                         </a>
-                                        <a href="{{ route('user.edit', $u->id) }}" class="tooltip" title="Edit User">
-                                            <button class="bg-forest-500 hover:bg-forest-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
-                                                Update
-                                            </button>
+
+                                        <a href="{{ route('user.edit', $u->id) }}"
+                                        class="text-forest-500 hover:text-yellow-500 transition duration-200"
+                                        title="Edit User">
+                                            <i class="bi bi-pencil-square text-xl"></i>
                                         </a>
-                                        <a href="{{ route('user.destroy', $u->id) }}" class="tooltip" title="Delete User">
-                                            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium"
-                                                    onClick="return confirm('Ingin hapus user?')">
-                                                Delete
-                                            </button>
+
+                                        <a href="{{ route('user.destroy', $u->id) }}"
+                                        onclick="return confirm('Ingin hapus user?')"
+                                        class="text-red-500 hover:text-red-700 transition duration-200"
+                                        title="Delete User">
+                                            <i class="bi bi-trash3-fill text-xl"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -74,7 +74,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="6" class="text-center py-8 text-gray-500">Tidak ada data</td>
+                                <td colspan="6" class="text-center py-8 text-gray-500">No data exists</td>
                             </tr>
                         @endif
                     </tbody>

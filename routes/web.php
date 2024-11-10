@@ -49,7 +49,7 @@ Route::prefix('blog')->group(function () {
     Route::post('/store', [BlogController::class, 'store'])->name('blog.store');
     Route::get('/edit/{id}', [BlogController::class, 'edit'])->name('blog.edit');
     Route::put('/update/{id}', [BlogController::class, 'update'])->name('blog.update');
-    Route::get('/destroy/{id}', [BlogController::class, 'destroy'])->name('blog.destroy');
+    Route::delete('/destroy/{id}', [BlogController::class, 'destroy'])->name('blog.destroy');
 });
 
 Route::prefix('transaction')->group(function () {
@@ -58,7 +58,8 @@ Route::prefix('transaction')->group(function () {
     Route::post('/store', [TransactionController::class, 'store'])->name('transaction.store');
     Route::get('/edit/{id}', [TransactionController::class, 'edit'])->name('transaction.edit');
     Route::put('/update/{id}', [TransactionController::class, 'update'])->name('transaction.update');
-    Route::get('/destroy/{id}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
+    Route::delete('/destroy/{id}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
+    Route::post('/transaction/update-status/{id}', [TransactionController::class, 'updateStatus'])->name('transaction.updateStatus');
 });
 
 Route::prefix('bank')->group(function () {
@@ -67,5 +68,5 @@ Route::prefix('bank')->group(function () {
     Route::post('/store', [BankController::class, 'store'])->name('bank.store');
     Route::get('/edit/{id}', [BankController::class, 'edit'])->name('bank.edit');
     Route::put('/update/{id}', [BankController::class, 'update'])->name('bank.update');
-    Route::get('/destroy/{id}', [BankController::class, 'destroy'])->name('bank.destroy');
+    Route::delete('bank/destroy/{id}', [BankController::class, 'destroy'])->name('bank.destroy');
 });

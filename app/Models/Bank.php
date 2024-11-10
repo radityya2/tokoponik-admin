@@ -8,6 +8,7 @@ class Bank extends Model
 {
     protected $fillable = [
         'owner_name',
+        'bank_name',
         'number'
     ];
 
@@ -15,5 +16,5 @@ class Bank extends Model
     {
         return $this->hasMany(Transaction::class);
     }
-    
+
 }

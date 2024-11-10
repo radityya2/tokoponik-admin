@@ -15,8 +15,9 @@ class DashboardController extends Controller
         $totalUsers = User::count();
         $totalProducts = Product::count();
         $totalBlogs = Blog::count();
+        $totalTransactions = Transaction::count();
 
 
-        return view('dashboard', compact('totalUsers', 'totalProducts', 'totalBlogs'));
+        return view('dashboard', compact('totalUsers', 'totalProducts', 'totalBlogs', 'totalTransactions'));
     }
 }

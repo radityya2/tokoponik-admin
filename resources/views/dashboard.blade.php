@@ -68,7 +68,7 @@
                     </svg>
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">128</span>
+                    <span class="text-3xl font-bold text-gray-900">{{ $totalTransactions }}</span>
                     <span class="block text-gray-500 text-sm">Total Transaction</span>
                 </div>
             </div>

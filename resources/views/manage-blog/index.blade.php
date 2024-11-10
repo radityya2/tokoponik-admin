@@ -12,17 +12,17 @@
     <!-- Main Content -->
     <div class="flex-1 p-8 bg-pastel-50">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-semibold text-forest-600">All Blog Posts</h1>
+        <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-forest-700">All Blog Posts</h1>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center space-x-6">
                     <input type="text"
                         id="searchInput"
                         placeholder="Search for blog posts"
-                        class="bg-white border border-pastel-200 text-forest-600 px-4 py-2 rounded-lg focus:outline-none focus:border-forest-500">
+                        class="bg-white border border-pastel-200 text-forest-600 px-5 py-2.5 rounded-lg focus:outline-none focus:border-forest-500">
 
                     <a href="{{ route('blog.create') }}">
-                        <button class="bg-forest-600 hover:bg-forest-500 text-white px-4 py-2 rounded-lg">
+                        <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-lg transition duration-200 font-medium shadow-sm hover:shadow-md">
                             Add new post
                         </button>
                     </a>
@@ -30,47 +30,46 @@
             </div>
 
 
-            <div class="overflow-x-auto">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <table id="productTable" class="w-full">
-                    <thead class="bg-green-200/50">
-                    <tr class="bg-pastel-100 text-forest-600">
-                            <th class="py-3 px-6 text-left">No</th>
-                            <th class="py-3 px-6 text-left">Title</th>
-                            <th class="py-3 px-6 text-left">Description</th>
-                            <th class="py-3 px-6 text-left">Image</th>
-                            <th class="py-3 px-6 text-left">Link</th>
-                            <th class="py-3 px-6 text-left">Action</th>
+                    <thead>
+                        <tr class="bg-forest-500 text-white">
+                            <th class="py-4 px-6 text-left font-medium">No</th>
+                            <th class="py-4 px-6 text-left font-medium">Title</th>
+                            <th class="py-4 px-6 text-left font-medium">Description</th>
+                            <th class="py-4 px-6 text-left font-medium">Image</th>
+                            <th class="py-4 px-6 text-left font-medium">Link</th>
+                            <th class="py-4 px-6 text-left font-medium">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white">
+                    <tbody id="productTableBody" class="divide-y divide-gray-100">
                         @if ($blogs->count() != 0)
                             @foreach ($blogs as $blog)
-                            <tr class="border-b border-gray-100">
-                                <td class="py-3 px-6">{{ $loop->iteration }}</td>
-                                <td class="py-3 px-6">{{ $blog->title }}</td>
-                                <td class="py-3 px-6">{{ $blog->description }}</td>
-                                <td class="py-3 px-6">{{ $blog->blog_picture }}</td>
-                                <td class="py-3 px-6">{{ $blog->blog_link }}</td>
-                                <td class="py-3 px-6 ">
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('blog.edit', $blog->id) }}">
-                                            <button class="w-24 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition duration-200">
-                                                Update
-                                            </button>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+                                <td class="py-4 px-6">{{ $loop->iteration }}</td>
+                                <td class="py-4 px-6">{{ $blog->title }}</td>
+                                <td class="py-4 px-6">{{ $blog->description }}</td>
+                                <td class="py-4 px-6">{{ $blog->blog_picture }}</td>
+                                <td class="py-4 px-6">{{ $blog->blog_link }}</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center space-x-3">
+                                        <a href="{{ route('blog.edit', $blog->id) }}" class="tooltip" title="Edit Blog">
+                                            <i class="bi bi-pencil-square text-xl text-forest-500 hover:text-yellow-500 transition duration-200"></i>
                                         </a>
-                                        <a href="{{ route('blog.destroy', $blog->id) }}">
-                                            <button class="w-24 bg-action-danger hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200"
-                                                    onClick="return confirm('Ingin hapus blog post?')">
-                                                Delete
+                                        <form action="{{ route('blog.destroy', $blog->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"  onclick="return confirm('Ingin hapus blog post?')">
+                                                <i class="bi bi-trash3-fill text-xl text-red-500 hover:text-red-700 transition duration-200" title="Delete Blog"></i>
                                             </button>
-                                        </a>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="6" class="text-center p-4 bg-green-50">Tidak ada data blog</td>
+                                <td colspan="6" class="text-center py-8 text-gray-500">No data exists</td>
                             </tr>
                         @endif
                     </tbody>

@@ -10,7 +10,7 @@
 </head>
 <body class="bg-gray-100">
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 bg-green-700 text-white transition-transform duration-300 z-50">
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 bg-forest-700 text-white transition-transform duration-300 z-50">
         <!-- Logo -->
         <div class="flex items-center gap-3 p-5 mb-6">
             <div class="bg-white p-2 rounded-lg">

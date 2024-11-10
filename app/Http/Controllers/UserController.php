@@ -32,7 +32,7 @@ class UserController extends Controller
             [
                 'name.required' => 'Nama wajib diisi',
                 'username.required' => 'Username wajib diisi',
-                'password.required' => 'Deskripsi wajib diisi',
+                'password.required' => 'Password wajib diisi',
                 'phone_number.required' => 'Nomor Telepon wajib diisi',
                 'role.required' => 'Role wajib diisi',
             ]

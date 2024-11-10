@@ -41,7 +41,7 @@ class TransactionController extends Controller
                 'proof' => $proof
             ]);
 
-            return redirect()->route('manage-transaction.index')
+            return redirect()->route('transaction.index')
                 ->with('success', 'Transaksi berhasil dibuat');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -83,7 +83,7 @@ class TransactionController extends Controller
 
             $transaction->update($validated);
 
-            return redirect()->route('manage-transaction.index')
+            return redirect()->route('transaction.index')
                 ->with('success', 'Transaksi berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -98,7 +98,16 @@ class TransactionController extends Controller
         Storage::disk('public')->delete($transaction->proof);
         $transaction->delete();
 
-        return redirect()->route('manage-transaction.index')
+        return redirect()->route('transaction.index')
             ->with('success', 'Transaksi berhasil dihapus');
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $transaction = Transaction::findOrFail($id);
+        $transaction->status = $request->input('status');
+        $transaction->save();
+
+        return redirect()->back()->with('success', 'Status transaksi berhasil diperbarui.');
     }
 }
