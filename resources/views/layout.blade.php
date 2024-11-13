@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     @vite('resources/css/app.css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -80,15 +81,14 @@
 
             <!-- Right Navigation Items -->
             <div class="flex items-center gap-4">
-                <button class="p-2 hover:bg-gray-100 rounded-full">
+                <button class="p-2 hover:bg-gray-100 rounded-full logout-btn">
                     <i class="bi bi-door-open text-xl"></i>
                 </button>
                 <div class="flex items-center gap-3">
                     <div class="text-right">
-                        <p class="font-medium">Admin User</p>
-                        <p class="text-sm text-gray-500">Administrator</p>
+                        <p class="font-medium user-name">Loading...</p>
+                        <p class="text-sm text-gray-500 user-role">Loading...</p>
                     </div>
-
                 </div>
             </div>
         </nav>
@@ -100,5 +100,58 @@
     </main>
 
     @stack('scripts')  <!-- Pastikan ini ada -->
+    <script>
+    $(document).ready(function() {
+        // Cek apakah sedang di halaman login
+        if (window.location.pathname === '/login') {
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // Set default headers untuk semua request ajax
+        $.ajaxSetup({
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // Ambil data user untuk header
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/login',
+            method: 'POST',
+            success: function(response) {
+                if (response.status === 200) {
+                    $('.user-name').text(response.data.name || response.data.username);
+                    $('.user-role').text(response.data.role);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr);
+                if (xhr.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                }
+            }
+        });
+
+        // Handle logout
+        $('.logout-btn').click(function(e) {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        });
+    });
+
+
+
+
+    </script>
 </body>
 </html>

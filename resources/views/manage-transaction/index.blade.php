@@ -44,11 +44,12 @@
                         <td class="py-4 px-6">Rp {{ number_format($transaction->grand_total) }}</td>
                         <td class="py-4 px-6">
                             <span class="px-3 py-1 rounded-full text-xs font-medium
-                                {{ strtolower($transaction->status) === 'belum dibayar' ? 'bg-gray-500 text-white' :
-                                   (strtolower($transaction->status) === 'dikemas' ? 'bg-yellow-500 text-white' :
-                                   (strtolower($transaction->status) === 'dikirim' ? 'bg-blue-500 text-white' :
-                                   (strtolower($transaction->status) === 'selesai' ? 'bg-emerald-500 text-white' :
-                                   (strtolower($transaction->status) === 'dibatalkan' ? 'bg-red-500 text-white' : 'bg-primary-500 text-white')))) }}">
+                                {{ strtolower($transaction->status) === 'belum dibayar' ? 'bg-gray-100 text-gray-700' :
+                                    (strtolower($transaction->status) === 'menunggu verifikasi' ? 'bg-yellow-500 text-white' :
+                                    (strtolower($transaction->status) === 'sedang dikemas' ? 'bg-yellow-100 text-yellow-700' :
+                                    (strtolower($transaction->status) === 'sedang dikirim' ? 'bg-blue-100 text-blue-700' :
+                                    (strtolower($transaction->status) === 'selesai' ? 'bg-emerald-100 text-emerald-700' :
+                                    (strtolower($transaction->status) === 'dibatalkan' ? 'bg-red-100 text-red-700' : 'bg-primary-500 text-white'))))) }}">
                                 {{ str_replace('_', ' ', $transaction->status) }}
                             </span>
                         </td>
@@ -77,27 +78,53 @@
         const proofModal = document.getElementById('proofModal');
         proofModal.classList.add('hidden');
     }
+
+    function updateStatus(transactionId, status) {
+        console.log('Transaction ID:', transactionId);
+        console.log('New Status:', status);
+        fetch(`{{ url('transaction/updateStatus') }}/${transactionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Status updated successfully');
+            } else {
+                console.error('Error updating status');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    document.querySelectorAll('select[name="status"]').forEach(select => {
+        select.addEventListener('change', function() {
+            const transactionId = this.closest('tr').querySelector('td:first-child').textContent; // Ambil ID transaksi dari kolom No
+            const status = this.value;
+            updateStatus(transactionId, status);
+        });
+    });
 </script>
                         <td class="py-4 px-6">
                             <div class="flex items-center space-x-3">
-                            <button onclick="toggleDropdown('{{ $transaction->id }}')" class="bg-{{ strtolower($transaction->status) }} hover:bg-forest-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
-                                    {{ str_replace('_', ' ', $transaction->status) }}
-                                </button>
-                                <div id="dropdown-{{ $transaction->id }}" class="hidden absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                    <form action="{{ route('transaction.updateStatus', $transaction->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" name="status" value="belum dibayar" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Belum Dibayar</button>
-                                        <button type="submit" name="status" value="dikemas" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dikemas</button>
-                                        <button type="submit" name="status" value="dikirim" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dikirim</button>
-                                        <button type="submit" name="status" value="selesai" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Selesai</button>
-                                        <button type="submit" name="status" value="dibatalkan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dibatalkan</button>
-                                    </form>
+                                <div id="dropdown-{{ $transaction->id }}" class="relative">
+                                    <select name="status" onchange="updateStatus({{ $transaction->id }}, this.value)" class="block w-full px-4 py-2 text-sm text-gray-700 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 hover:bg-gray-200">
+                                        <option value="belum dibayar" {{ $transaction->status === 'belum dibayar' ? 'selected' : '' }}>Belum Dibayar</option>
+                                        <option value="dikemas" {{ $transaction->status === 'dikemas' ? 'selected' : '' }}>Dikemas</option>
+                                        <option value="dikirim" {{ $transaction->status === 'dikirim' ? 'selected' : '' }}>Dikirim</option>
+                                        <option value="selesai" {{ $transaction->status === 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                        <option value="dibatalkan" {{ $transaction->status === 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                                    </select>
                                 </div>
                                 <a href="{{ route('transaction.destroy', $transaction->id) }}"
                                    onclick="return confirm('Yakin ingin menghapus?')"
                                    class="text-red-500 hover:text-red-700 transition duration-200"
                                    title="Delete Transaction">
-                                    <i class="bi bi-trash3-fill text-xl" ></i>
+                                    <i class="bi bi-trash3-fill text-xl"></i>
                                 </a>
                             </div>
                         </td>

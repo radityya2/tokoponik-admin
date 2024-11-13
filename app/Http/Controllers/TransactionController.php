@@ -108,6 +108,6 @@ class TransactionController extends Controller
         $transaction->status = $request->input('status');
         $transaction->save();
 
-        return redirect()->back()->with('success', 'Status transaksi berhasil diperbarui.');
+        return response()->json(['success' => true]);
     }
 }

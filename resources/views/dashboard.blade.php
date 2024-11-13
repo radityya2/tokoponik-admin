@@ -22,7 +22,7 @@
 
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">{{ $totalUsers }}</span>
+                    <span class="text-3xl font-bold text-gray-900">100</span>
                     <span class="block text-gray-500 text-sm">Total Users</span>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     </svg>
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">{{ $totalProducts }}</span>
+                    <span class="text-3xl font-bold text-gray-900">100</span>
                     <span class="block text-gray-500 text-sm">Total Products</span>
                 </div>
             </div>
@@ -53,7 +53,7 @@
 
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">{{ $totalBlogs }}</span>
+                    <span class="text-3xl font-bold text-gray-900">100</span>
                     <span class="block text-gray-500 text-sm">Total Blogs</span>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                     </svg>
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">{{ $totalTransactions }}</span>
+                    <span class="text-3xl font-bold text-gray-900">100</span>
                     <span class="block text-gray-500 text-sm">Total Transaction</span>
                 </div>
             </div>

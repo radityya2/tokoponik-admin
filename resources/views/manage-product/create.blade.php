@@ -11,11 +11,17 @@
 
 @section('content')
     <div class="bg-green-50 rounded-lg shadow-md p-8">
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="border-b border-green-200 mb-6">
             <h1 class="text-gray-800 text-2xl font-bold mb-4">Form Add Product</h1>
         </div>
 
-        <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data" id="create-user">
             @csrf
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="name">Name</label>
@@ -67,9 +73,9 @@
                     id="type"
                     name="type">
                     <option value="" disabled selected>Select product type</option>
-                    <option value="Vegetable">Vegetable</option>
-                    <option value="Tools">Tools</option>
-                    <option value="Seeds">Seeds</option>
+                    <option value="vegetable" {{ old('type') == 'vegetable' ? 'selected' : '' }}>vegetable</option>
+                    <option value="tool" {{ old('type') == 'tool' ? 'selected' : '' }}>tool</option>
+                    <option value="seed" {{ old('type') == 'seed' ? 'selected' : '' }}>seed</option>
                 </select>
                 @error('type')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -93,3 +99,40 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $("#create-user").submit(function(event){
+            event.preventDefault(); // Mencegah form dari submit default
+
+            // Mengambil data dari form
+            var formData = new FormData(this);
+
+            // Mengirim data menggunakan AJAX
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/products/store',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+
+
+                    // Pindah ke halaman index setelah sukses
+                    window.location.href = "{{ route('product.index') }}"; // Ganti dengan URL index produk
+                },
+                error: function(xhr) {
+                    // Tindakan jika terjadi kesalahan
+                    var errors = xhr.responseJSON.errors;
+                    var errorMessage = '';
+                    for (var key in errors) {
+                        errorMessage += errors[key].join(', ') + '\n';
+                    }
+                    alert('Terjadi kesalahan:\n' + errorMessage);
+                }
+            });
+        });
+    });
+</script>

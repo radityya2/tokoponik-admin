@@ -1,5 +1,5 @@
 @extends('layout')
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @section('title')
     Data Product
 @endsection
@@ -9,26 +9,17 @@
 @endsection
 
 @section('content')
-    <!-- Main Content -->
     <div class="flex-1 p-8 bg-pastel-50">
-        <!-- Header dengan styling yang diperbarui -->
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold text-forest-700">All Products</h1>
-
             <div class="flex items-center space-x-6">
-                <input type="text"
-                    id="searchInput"
-                    placeholder="Search for products"
-                    class="bg-white border border-pastel-200 text-forest-600 px-5 py-2.5 rounded-lg focus:outline-none focus:border-forest-500 focus:ring-2 focus:ring-forest-200 transition-all duration-200">
-
-                <select id="typeFilter"
-                    class="bg-white border border-pastel-200 text-forest-600 px-5 py-2.5 rounded-lg focus:outline-none focus:border-forest-500 focus:ring-2 focus:ring-forest-200 transition-all duration-200 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%2011.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20fill%3D%22%236b7280%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:1.5em_1.5em] pr-12">
+                <input type="text" id="searchInput" placeholder="Search for products" class="bg-white border border-pastel-200 text-forest-600 px-5 py-2.5 rounded-lg focus:outline-none focus:border-forest-500 focus:ring-2 focus:ring-forest-200 transition-all duration-200">
+                <select id="typeFilter" class="bg-white border border-pastel-200 text-forest-600 px-5 py-2.5 rounded-lg focus:outline-none focus:border-forest-500 focus:ring-2 focus:ring-forest-200 transition-all duration-200">
                     <option value="">All Types</option>
                     <option value="vegetable">Vegetable</option>
                     <option value="seed">Seed</option>
                     <option value="tool">Tool</option>
                 </select>
-
                 <a href="{{ route('product.create') }}">
                     <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-lg transition duration-200 font-medium shadow-sm hover:shadow-md">
                         Add new product
@@ -37,7 +28,6 @@
             </div>
         </div>
 
-        <!-- Tabel dengan styling yang diperbarui -->
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <table id="productTable" class="w-full">
                 <thead>
@@ -50,50 +40,7 @@
                         <th class="py-4 px-6 text-left font-medium">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @if ($products->count() != 0)
-                        @foreach ($products as $p)
-                        <tr class="hover:bg-gray-50 transition duration-150">
-                            <td class="py-4 px-6 text-sm">{{ $loop->iteration }}</td>
-                            <td class="py-4 px-6 text-sm">{{ $p->name }}</td>
-                            <td class="py-4 px-6 text-sm">
-                                <div class="flex items-center">
-                                    <span>Rp</span>
-                                    <span class="ml-1">{{ number_format($p->price, 2, ',', '.') }}</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-6 text-sm">{{ $p->description }}</td>
-                            <td class="py-4 px-6 text-sm">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium
-                                    {{ strtolower($p->type) === 'vegetable' ? 'bg-emerald-100 text-emerald-700' :
-                                       (strtolower($p->type) === 'seed' ? 'bg-blue-100 text-blue-700' :
-                                       'bg-amber-100 text-amber-700') }}">
-                                    {{ $p->type }}
-                                </span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center space-x-4">
-                                    <a href="{{ route('product.edit', $p->id) }}"
-                                       class="text-forest-500 hover:text-yellow-500 transition duration-200"
-                                       title="Edit Product">
-                                        <i class="bi bi-pencil-square text-xl"></i>
-                                    </a>
-
-                                    <a href="{{ route('product.destroy', $p->id) }}"
-                                       onclick="return confirm('Ingin hapus produk?')"
-                                       class="text-red-500 hover:text-red-700 transition duration-200"
-                                       title="Delete Product">
-                                        <i class="bi bi-trash3-fill text-xl"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="6" class="text-center py-8 text-gray-500 bg-gray-50">No data exists</td>
-                        </tr>
-                    @endif
+                <tbody>
                 </tbody>
             </table>
         </div>
@@ -101,32 +48,149 @@
 @endsection
 
 @push('scripts')
-<!-- Pastikan jQuery dimuat terlebih dahulu -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <script>
     $(document).ready(function() {
-        function filterTable() {
-            var searchValue = $("#searchInput").val().toLowerCase();
-            var typeValue = $("#typeFilter").val().toLowerCase().trim();
+        // Fungsi untuk memuat data produk
+        function loadProducts() {
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/products',
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                success: function(response) {
+                    var tbody = $('#productTable tbody');
+                    tbody.empty();
 
-            $("#productTable tbody tr").each(function() {
-                var row = $(this);
-                // Skip baris "Tidak ada data"
-                if (row.find('td[colspan]').length > 0) return;
-
-                var rowText = row.text().toLowerCase();
-                var typeCell = row.find("td:eq(4)").text().toLowerCase().trim();
-
-                var matchesSearch = rowText.indexOf(searchValue) > -1;
-                var matchesType = typeValue === "" || typeCell.includes(typeValue);
-
-                row.toggle(matchesSearch && matchesType);
+                    if (response.data && response.data.length > 0) {
+                        response.data.forEach(function(product, index) {
+                            var row = `
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+                                    <td class="py-4 px-6">${index + 1}</td>
+                                    <td class="py-4 px-6 text-sm">${product.name || '-'}</td>
+                                    <td class="py-4 px-6">Rp ${formatNumber(product.price || 0)}</td>
+                                    <td class="py-4 px-6">${product.description || '-'}</td>
+                                    <td class="py-4 px-6">
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(product.type)}">
+                                            ${product.type || '-'}
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center space-x-3">
+                                            <a href="#" onclick="editProduct(${product.id})" class="text-blue-500 hover:text-blue-800 transition duration-200" title="Edit Product">
+                                                <i class="bi bi-pencil-square text-xl"></i>
+                                            </a>
+                                            <button onclick="deleteProduct(${product.id})" class="text-red-500 hover:text-red-700 transition duration-200" title="Delete Product">
+                                                <i class="bi bi-trash3-fill text-xl"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                            tbody.append(row);
+                        });
+                    } else {
+                        tbody.html('<tr><td colspan="6" class="text-center py-8 text-gray-500">Tidak ada data</td></tr>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('#productTable tbody').html('<tr><td colspan="6" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
+                }
             });
         }
 
+        // Fungsi untuk filter tabel
+        function filterTable() {
+            var searchValue = $("#searchInput").val().toLowerCase();
+            var typeValue = $("#typeFilter").val().toLowerCase();
+
+            $("#productTable tbody tr").each(function() {
+                var row = $(this);
+                var name = row.find("td:eq(1)").text().toLowerCase();
+                var type = row.find("td:eq(4)").text().trim().toLowerCase();
+
+                var matchSearch = name.includes(searchValue);
+                var matchType = typeValue === "" || type.includes(typeValue);
+
+                row.toggle(matchSearch && matchType);
+            });
+        }
+
+        // Fungsi format angka
+        function formatNumber(number) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(number);
+        }
+
+        // Definisikan fungsi deleteProduct di scope global
+        window.deleteProduct = function(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                $.ajax({
+                    url: `http://127.0.0.1:8000/api/products/${id}/destroy`,
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(response) {
+                        loadProducts();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Gagal menghapus produk');
+                    }
+                });
+            }
+        };
+
+        // Tambahkan fungsi editProduct
+        window.editProduct = function(id) {
+            $.ajax({
+                url: `http://127.0.0.1:8000/api/products/${id}`,
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.data) {
+                        localStorage.setItem('editProduct', JSON.stringify(response.data));
+                        window.location.href = `/product/${id}/edit`;
+                    } else {
+                        alert('Data produk tidak ditemukan');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('Gagal mengambil data produk');
+                }
+            });
+        };
+
+        // Event listeners untuk filter
         $("#searchInput").on("keyup", filterTable);
         $("#typeFilter").on("change", filterTable);
+
+        // Muat data saat halaman dimuat
+        loadProducts();
     });
+
+    function getTypeColor(type) {
+        type = type.toLowerCase();
+        switch(type) {
+            case 'vegetable':
+                return 'bg-green-100 text-green-700';
+            case 'tool':
+                return 'bg-blue-100 text-blue-700';
+            case 'seed':
+                return 'bg-yellow-100 text-yellow-700';
+            default:
+                return 'bg-gray-100 text-gray-700';
+        }
+    }
 </script>
 @endpush

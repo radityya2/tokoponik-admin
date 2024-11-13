@@ -1,4 +1,5 @@
 @extends('layout')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 @section('title')
     Edit Bank
