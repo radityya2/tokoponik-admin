@@ -15,17 +15,15 @@
             <p class="text-gray-800 text-2xl font-bold mb-3">Form Edit User</p>
         </div>
 
-        <form action="{{ route('user.update', $query->id) }}" method="POST" enctype="multipart/form-data">
+        <form id="editUserForm">
             @csrf
-            @method('PUT')
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="name">Name</label>
                 <input type="text"
                     class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('name') border-red-500 @enderror"
                     id="name"
                     name="name"
-                    placeholder="Masukkan nama lengkap"
-                    value="{{ $query->name }}">
+                    placeholder="Masukkan nama lengkap">
                 @error('name')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -37,8 +35,7 @@
                     class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('username') border-red-500 @enderror"
                     id="username"
                     name="username"
-                    placeholder="Masukkan username"
-                    value="{{ $query->username }}">
+                    placeholder="Masukkan username">
                 @error('username')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -52,8 +49,7 @@
                         class="flex-1 px-4 py-2.5 border rounded-r-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('phone_number') border-red-500 @enderror"
                         id="phone_number"
                         name="phone_number"
-                        placeholder="Contoh: 81234567890"
-                        value="{{ $query->phone_number }}">
+                        placeholder="Contoh: 81234567890">
                 </div>
                 @error('phone_number')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -65,10 +61,10 @@
                 <select class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('role') border-red-500 @enderror"
                     id="role"
                     name="role">
-                    <option value="admin" {{ $query->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="manager" {{ $query->role == 'manager' ? 'selected' : '' }}>Manager</option>
-                    <option value="customer_service" {{ $query->role == 'customer_service' ? 'selected' : '' }}>Customer Service</option>
-                    <option value="customer" {{ $query->role == 'customer' ? 'selected' : '' }}>Customer</option>
+                    <option value="admin">Admin</option>
+                    <option value="manager">Manager</option>
+                    <option value="customer_service">Customer Service</option>
+                    <option value="customer">Customer</option>
                 </select>
                 @error('role')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -94,3 +90,102 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    const userId = window.location.pathname.split('/')[2];
+    const token = localStorage.getItem('token');
+
+    // Ambil data user terlebih dahulu
+    $.ajax({
+        url: `http://127.0.0.1:8000/api/auth/users/${userId}`,
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+        },
+        success: function(response) {
+            if (response.data) {
+                $('#name').val(response.data.name || '');
+                $('#username').val(response.data.username || '');
+                $('#phone_number').val(response.data.phone_number || '');
+                $('#role').val(response.data.role || '');
+            }
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr);
+            alert('Gagal mengambil data user');
+            window.location.href = '/user';
+        }
+    });
+
+    // Handle form submit
+    $('#editUserForm').on('submit', function(e) {
+        e.preventDefault();
+
+        // Format nomor telepon
+        let phoneNumber = $('#phone_number').val().replace(/^0+/, '');
+        // Hapus karakter non-numerik
+        phoneNumber = phoneNumber.replace(/\D/g, '');
+
+        const formData = {
+            name: $('#name').val(),
+            username: $('#username').val(),
+            phone_number: phoneNumber,
+            role: $('#role').val(),
+            
+        };
+
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.text();
+        submitBtn.prop('disabled', true).text('Memperbarui...');
+
+        $.ajax({
+            url: `http://127.0.0.1:8000/api/auth/users/${userId}/update`,
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: JSON.stringify(formData),
+            success: function(response) {
+                console.log('Success:', response);
+                alert('Data berhasil diperbarui');
+                window.location.href = "{{ route('user.index') }}";
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false).text(originalText);
+                console.error('Error:', xhr);
+                const response = xhr.responseJSON;
+
+                // Reset semua error state
+                $('.text-red-500').remove();
+                $('input, select').removeClass('border-red-500');
+
+                if (response && response.errors) {
+                    Object.keys(response.errors).forEach(function(key) {
+                        const errorMessage = response.errors[key][0];
+                        $(`#${key}`).addClass('border-red-500');
+                        $(`#${key}`).after(`<p class="text-red-500 text-xs mt-1">${errorMessage}</p>`);
+                    });
+                } else if (response && response.message) {
+                    alert(response.message);
+                } else {
+                    alert('Gagal memperbarui data. Silakan coba lagi.');
+                }
+            }
+        });
+    });
+
+    // Reset error state saat input berubah
+    $('input, select').on('change', function() {
+        $(this).removeClass('border-red-500');
+        $(this).next('.text-red-500').remove();
+    });
+});
+</script>
+@endpush

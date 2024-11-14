@@ -106,14 +106,29 @@ $(document).ready(function() {
     // Fungsi untuk menghapus user
     window.deleteUser = function(id) {
         if (confirm('Yakin ingin menghapus user ini?')) {
+            const token = localStorage.getItem('token');
+
             $.ajax({
-                url: `http://127.0.0.1:8000/api/auth/users/${id}`,
+                url: `http://127.0.0.1:8000/api/auth/users/${id}/destroy`,
                 method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 success: function(response) {
-                    loadUsers(); // Reload data setelah berhasil menghapus
+                    loadUsers();
+                    
                 },
                 error: function(xhr) {
-                    alert('Gagal menghapus user');
+                    console.error('Error:', xhr);
+                    if (xhr.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = '/login';
+                    } else {
+                        alert('Gagal menghapus user: ' + (xhr.responseJSON?.message || 'Terjadi kesalahan'));
+                    }
                 }
             });
         }

@@ -106,3 +106,63 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('form').on('submit', function(e) {
+        e.preventDefault();
+
+        // Ambil nilai dari form
+        const formData = {
+            name: $('#name').val(),
+            username: $('#username').val(),
+            password: $('#password').val(),
+            phone_number: $('#phone_number').val().replace(/^0+/, ''), // Hapus angka 0 di depan
+            role: $('#role').val()
+        };
+
+        // Kirim request ke API
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/auth/users/store',
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(formData),
+            success: function(response) {
+
+                window.location.href = "{{ route('user.index') }}";
+
+            },
+            error: function(xhr) {
+                const response = xhr.responseJSON;
+                if (response && response.errors) {
+                    // Loop setiap error kecuali username yang sudah ada
+                    Object.keys(response.errors).forEach(function(key) {
+                        // Skip jika error terkait username yang sudah ada
+                        if (key === 'username' && response.errors[key][0].includes('already')) {
+                            return;
+                        }
+                        const errorMessage = response.errors[key][0];
+                        $(`#${key}`).addClass('border-red-500');
+                        $(`#${key}`).next('.text-red-500').remove();
+                        $(`#${key}`).after(`<p class="text-red-500 text-xs mt-1">${errorMessage}</p>`);
+                    });
+                } else {
+                    alert('Terjadi kesalahan saat menyimpan data');
+                }
+            }
+        });
+    });
+
+    // Reset error state saat input berubah
+    $('input, select').on('change', function() {
+        $(this).removeClass('border-red-500');
+        $(this).next('.text-red-500').remove();
+    });
+});
+</script>
+@endpush

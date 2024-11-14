@@ -93,21 +93,34 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Ambil data produk dari localStorage
-    const productData = JSON.parse(localStorage.getItem('editProduct'));
-    console.log('Product Data:', productData); // Debugging
+    const productId = window.location.pathname.split('/')[2];
 
-    if (productData) {
-        $('#name').val(productData.name || '');
-        $('#price').val(productData.price || '');
-        $('#description').val(productData.description || '');
-        $('#type').val(productData.type || '');
-    }
+    // Ambil data produk dari API
+    $.ajax({
+        url: `http://127.0.0.1:8000/api/products/${productId}`,
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        success: function(response) {
+            if (response.data) {
+                $('#name').val(response.data.name || '');
+                $('#price').val(response.data.price || '');
+                $('#description').val(response.data.description || '');
+                $('#type').val(response.data.type || '');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            alert('Gagal mengambil data produk');
+            window.location.href = '{{ route("product.index") }}';
+        }
+    });
 
     $('#editProductForm').on('submit', function(e) {
         e.preventDefault();
 
-        const productId = window.location.pathname.split('/')[2];
         const formData = {
             name: $('#name').val(),
             price: $('#price').val(),
@@ -131,7 +144,6 @@ $(document).ready(function() {
             data: JSON.stringify(formData),
             success: function(response) {
                 console.log('Success:', response);
-                localStorage.removeItem('editProduct');
                 window.location.href = '{{ route("product.index") }}';
             },
             error: function(xhr, status, error) {

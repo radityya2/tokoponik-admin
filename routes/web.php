@@ -30,7 +30,7 @@ Route::middleware(['web'])->group(function () {
             return redirect()->route('user.index');
         })->name('user.store');
 
-        Route::get('/edit/{id}', function($id) {
+        Route::get('/{id}/edit', function($id) {
             return view('manage-user.edit');
         })->name('user.edit');
 
@@ -55,11 +55,6 @@ Route::middleware(['web'])->group(function () {
         Route::post('/store', function() {
             return redirect()->route('product.index');
         })->name('product.store');
-
-
-        Route::put('/update/{id}', function($id) {
-            return redirect()->route('product.index');
-        })->name('product.update');
 
         Route::delete('/destroy/{id}', function($id) {
             return redirect()->route('product.index');
