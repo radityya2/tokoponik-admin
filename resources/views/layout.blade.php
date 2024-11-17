@@ -15,7 +15,7 @@
         <!-- Logo -->
         <div class="flex items-center gap-3 p-5 mb-6">
             <div class="bg-white p-2 rounded-lg">
-                <img src="assets/img/logo.png" alt="Logo" class="w-8 h-8">
+                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="h-8 w-8">
             </div>
             <span class="text-2xl font-bold text-white">Tokoponik</span>
         </div>
@@ -108,7 +108,9 @@
         }
 
         const token = localStorage.getItem('token');
-        if (!token) {
+        const userId = localStorage.getItem('user_id');
+
+        if (!token || !userId) {
             window.location.href = '/login';
             return;
         }
@@ -123,11 +125,11 @@
 
         // Ambil data user untuk header
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/login',
-            method: 'POST',
+            url: `http://127.0.0.1:8000/api/auth/users/id/info`,
+            method: 'GET',
             success: function(response) {
                 if (response.status === 200) {
-                    $('.user-name').text(response.data.name || response.data.username);
+                    $('.user-name').text(response.data.username);
                     $('.user-role').text(response.data.role);
                 }
             },
@@ -135,10 +137,15 @@
                 console.error('Error:', xhr);
                 if (xhr.status === 401) {
                     localStorage.removeItem('token');
+                    localStorage.removeItem('user_id');
                     window.location.href = '/login';
                 }
             }
         });
+
+        // Tambahkan ini untuk memastikan nilai userId dan token
+        console.log('User ID:', userId);
+        console.log('Token:', token);
 
         // Handle logout
         $('.logout-btn').click(function(e) {

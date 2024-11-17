@@ -72,10 +72,10 @@
                 <input type="file"
                     class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                     id="photos"
-                    name="photos[]"
-                    accept="image/*"
-                    multiple>
+                    name="photo"
+                    accept="image/jpeg,image/png,image/jpg">
                 <div id="preview" class="mt-2 flex flex-wrap gap-2"></div>
+                <p class="text-red-500 text-xs mt-1" id="photo-error"></p>
             </div>
 
             <div class="mb-8">
@@ -119,7 +119,17 @@ $(document).ready(function() {
     $('#createProductForm').on('submit', function(e) {
         e.preventDefault();
 
-        const formData = new FormData(this);
+        const formData = new FormData();
+        formData.append('name', $('#name').val());
+        formData.append('price', $('#price').val());
+        formData.append('description', $('#description').val());
+        formData.append('type', $('#type').val());
+        
+        // Ambil file pertama saja karena backend hanya menerima satu foto
+        const photoFile = $('#photos')[0].files[0];
+        if (photoFile) {
+            formData.append('photo', photoFile);
+        }
 
         $.ajax({
             url: 'http://127.0.0.1:8000/api/products/store',
@@ -145,7 +155,17 @@ $(document).ready(function() {
             },
             error: function(xhr) {
                 console.error('Error:', xhr);
-                alert('Gagal menyimpan produk');
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    // Tampilkan error validasi
+                    const errors = xhr.responseJSON.errors;
+                    Object.keys(errors).forEach(key => {
+                        const errorMsg = errors[key][0];
+                        $(`#${key}`).addClass('border-red-500');
+                        $(`#${key}`).after(`<p class="text-red-500 text-xs mt-1">${errorMsg}</p>`);
+                    });
+                } else {
+                    alert('Gagal menyimpan produk: ' + (xhr.responseJSON?.message || 'Terjadi kesalahan'));
+                }
             }
         });
     });

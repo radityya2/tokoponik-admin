@@ -64,15 +64,14 @@ $(document).ready(function() {
 
                 if (response.data && response.data.length > 0) {
                     response.data.forEach(function(transaction, index) {
-                        console.log('Data transaksi:', transaction);
-                        console.log('Data user:', transaction.user);
-
-                        var username = transaction.user ? transaction.user.username : '-';
+                        const proofPath = transaction.proof
+                            ? `/storage/${transaction.proof}`
+                            : null;
 
                         var row = `
                             <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
                                 <td class="py-4 px-6">${index + 1}</td>
-                                <td class="py-4 px-6">${username}</td>
+                                <td class="py-4 px-6">${transaction.user ? transaction.user.username : '-'}</td>
                                 <td class="py-4 px-6">${transaction.bank?.bank_name || '-'}</td>
                                 <td class="py-4 px-6">Rp ${formatNumber(transaction.grand_total)}</td>
                                 <td class="py-4 px-6">
@@ -81,7 +80,8 @@ $(document).ready(function() {
                                     </span>
                                 </td>
                                 <td class="py-4 px-6">
-                                    <button onclick="showProof('${transaction.proof}')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
+                                    <button onclick="showProof('${proofPath}')"
+                                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
                                         <i class="bi bi-search text-sm" style="margin-right: 0.25rem;"></i>
                                         Proof of Payment
                                     </button>
@@ -92,19 +92,13 @@ $(document).ready(function() {
                                             <select name="status" onchange="updateStatus(${transaction.id}, this.value)"
                                                 class="block w-full px-4 py-2 text-sm text-gray-700 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 hover:bg-gray-200">
                                                 <option value="belum dibayar" ${transaction.status === 'belum dibayar' ? 'selected' : ''}>Belum Dibayar</option>
-                                                <option value="waiting for verification" ${transaction.status === 'waiting for verification' ? 'selected' : ''}>Waiting for Verification</option>
+                                                <option value="menunggu verifikasi" ${transaction.status === 'menunggu verifikasi' ? 'selected' : ''}>Menunggu Verifikasi</option>
                                                 <option value="dikemas" ${transaction.status === 'dikemas' ? 'selected' : ''}>Dikemas</option>
                                                 <option value="dikirim" ${transaction.status === 'dikirim' ? 'selected' : ''}>Dikirim</option>
                                                 <option value="selesai" ${transaction.status === 'selesai' ? 'selected' : ''}>Selesai</option>
                                                 <option value="dibatalkan" ${transaction.status === 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
                                             </select>
                                         </div>
-                                        ${transaction.proof ? '' : `
-                                            <button onclick="addProof(${transaction.id})"
-                                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
-                                                <i class="bi bi-upload"></i> Add Proof
-                                            </button>
-                                        `}
                                         <a href="javascript:void(0)" onclick="deleteTransaction(${transaction.id})"
                                            class="text-red-500 hover:text-red-700 transition duration-200"
                                            title="Delete Transaction">
@@ -141,6 +135,7 @@ $(document).ready(function() {
     function getStatusClass(status) {
         const statusClasses = {
             'belum dibayar': 'bg-red-500 text-white',
+            'menunggu verifikasi': 'bg-yellow-700 text-white',
             'dikemas': 'bg-yellow-500 text-white',
             'dikirim': 'bg-blue-500 text-white',
             'selesai': 'bg-green-500 text-white',
@@ -154,21 +149,40 @@ $(document).ready(function() {
         if (!proofPath) {
             Swal.fire({
                 title: 'Info',
-                text: 'No proof of payment uploaded yet',
+                text: 'Proof of Payment not uploaded yet',
                 icon: 'info',
                 confirmButtonText: 'OK'
             });
             return;
         }
 
-        Swal.fire({
-            title: 'Proof of Payment',
-            imageUrl: `/storage/${proofPath}`,
-            imageWidth: 400,
-            imageHeight: 400,
-            imageAlt: 'Proof of Payment Image',
-            confirmButtonText: 'Close'
-        });
+        // Pastikan path lengkap
+        const baseUrl = 'http://127.0.0.1:8000';
+        const fullImageUrl = proofPath.startsWith('http') ? proofPath : baseUrl + proofPath;
+
+        // Cek apakah gambar bisa dimuat
+        const img = new Image();
+        img.onload = function() {
+            Swal.fire({
+                title: 'Proof of Payment',
+                imageUrl: fullImageUrl,
+                imageWidth: 400,
+                imageHeight: 400,
+                imageAlt: 'Proof of Payment Image',
+                confirmButtonText: 'Close'
+            });
+        };
+
+        img.onerror = function() {
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to load proof of payment image',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        };
+
+        img.src = fullImageUrl;
     };
 
     // Fungsi untuk update status

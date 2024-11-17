@@ -35,7 +35,6 @@
                         <th class="py-4 px-6 text-left font-medium">Title</th>
                         <th class="py-4 px-6 text-left font-medium">Description</th>
                         <th class="py-4 px-6 text-left font-medium">Image</th>
-                        <th class="py-4 px-6 text-left font-medium">Link</th>
                         <th class="py-4 px-6 text-left font-medium">Action</th>
                     </tr>
                 </thead>
@@ -53,30 +52,35 @@ $(document).ready(function() {
     // Fungsi untuk memuat data blog
     function loadBlogs() {
         const token = localStorage.getItem('token');
+        const baseUrl = 'http://127.0.0.1:8000';
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/blogs',
+            url: `${baseUrl}/api/auth/blogs`,
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token,
                 'Accept': 'application/json'
             },
             success: function(response) {
+                console.log('API Response:', response);
                 var tbody = $('#blogTableBody');
                 tbody.empty();
 
                 if (response.data && response.data.length > 0) {
                     response.data.forEach(function(blog, index) {
-                        // Ambil gambar pertama jika ada
-                        let imagePath = '-';
+                        console.log('Blog data:', blog);
+                        console.log('Blog pics:', blog.blog_pics);
+
+                        // Perbaikan cara mengambil path gambar
+                        let imagePath;
                         if (blog.blog_pics && blog.blog_pics.length > 0) {
-                            // Ambil path dari API
-                            const picPath = blog.blog_pics[0].pic_path;
-                            // Hapus URL lengkap jika ada
-                            const cleanPath = picPath.replace(/^https?:\/\/[^\/]+\//, '');
-                            // Gunakan URL yang benar
-                            imagePath = cleanPath;
-                            console.log('Clean image path:', imagePath);
+                            imagePath = blog.blog_pics[0].pic_path;
+                            // Pastikan path lengkap
+                            if (!imagePath.startsWith('http')) {
+                                imagePath = `${baseUrl}/${imagePath}`;
+                            }
+                        } else {
+                            imagePath = `${baseUrl}/storage/photos/default.jpg`;
                         }
 
                         var row = `
@@ -85,19 +89,13 @@ $(document).ready(function() {
                                 <td class="py-4 px-6">${blog.title || '-'}</td>
                                 <td class="py-4 px-6">${blog.description || '-'}</td>
                                 <td class="py-4 px-6">
-                                    ${imagePath !== '-'
-                                        ? `<img src="${imagePath}"
-                                             alt="Blog Image"
-                                             class="w-20 h-20 object-cover rounded-lg"
-                                             onerror="console.error('Failed to load image:', this.src); this.style.display='none';">`
-                                        : '-'}
-                                </td>
-                                <td class="py-4 px-6">
-                                    ${blog.blog_links && blog.blog_links.length > 0
-                                        ? `<a href="${blog.blog_links[0].link}" target="_blank" class="text-blue-500 hover:text-blue-700 underline">
-                                            <i class="bi bi-link-45deg"></i> Link Blog
-                                           </a>`
-                                        : '-'}
+                                    <div class="h-16 w-16 bg-gray-100 rounded overflow-hidden">
+                                        <img src="${imagePath}"
+                                             alt="${blog.title}"
+                                             class="h-full w-full object-cover blog-image"
+                                             data-blog-id="${blog.id}"
+                                             onerror="this.onerror=null; this.src='${baseUrl}/storage/photos/default.jpg'">
+                                    </div>
                                 </td>
                                 <td class="py-4 px-6">
                                     <div class="flex gap-2">
@@ -116,7 +114,7 @@ $(document).ready(function() {
                         tbody.append(row);
                     });
                 } else {
-                    tbody.html('<tr><td colspan="6" class="text-center py-8 text-gray-500">Tidak ada data</td></tr>');
+                    tbody.html('<tr><td colspan="5" class="text-center py-8 text-gray-500">Tidak ada data</td></tr>');
                 }
             },
             error: function(xhr) {
@@ -125,7 +123,7 @@ $(document).ready(function() {
                     localStorage.removeItem('token');
                     window.location.href = '/login';
                 } else {
-                    $('#blogTableBody').html('<tr><td colspan="6" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
+                    $('#blogTableBody').html('<tr><td colspan="5" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
                 }
             }
         });
@@ -175,6 +173,69 @@ $(document).ready(function() {
 
     // Load data saat halaman dimuat
     loadBlogs();
+
+    // Cek apakah ada data blog yang baru diupdate
+    const updatedBlogStr = localStorage.getItem('updatedBlog');
+    if (updatedBlogStr) {
+        try {
+            const updatedBlog = JSON.parse(updatedBlogStr);
+
+            // Pastikan data masih fresh (kurang dari 5 detik)
+            const now = new Date().getTime();
+            if (now - updatedBlog.timestamp < 5000) { // 5 detik
+
+                // Update gambar di index jika ada
+                if (updatedBlog.blog_pics && updatedBlog.blog_pics.length > 0) {
+                    const blogId = updatedBlog.id;
+                    const newImagePath = updatedBlog.blog_pics[0].pic_path;
+
+                    // Pastikan path gambar lengkap
+                    const baseUrl = 'http://127.0.0.1:8000';
+                    const fullImageUrl = newImagePath.startsWith('http') ?
+                        newImagePath :
+                        baseUrl + '/' + newImagePath;
+
+                    console.log('Updating image for blog:', blogId);
+                    console.log('New image URL:', fullImageUrl);
+
+                    // Update semua instance gambar untuk blog ini
+                    $(`.blog-image[data-blog-id="${blogId}"]`).each(function() {
+                        $(this)
+                            .attr('src', fullImageUrl)
+                            .on('load', function() {
+                                console.log('Image loaded successfully');
+                            })
+                            .on('error', function() {
+                                console.log('Failed to load image:', fullImageUrl);
+                            });
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Error parsing updatedBlog:', e);
+        }
+
+        // Hapus data dari localStorage
+        localStorage.removeItem('updatedBlog');
+    }
+
+    // Cek apakah ada blog baru yang ditambahkan
+    const newBlogStr = localStorage.getItem('newBlog');
+    if (newBlogStr) {
+        try {
+            const newBlog = JSON.parse(newBlogStr);
+            // Pastikan data masih fresh (kurang dari 5 detik)
+            const now = new Date().getTime();
+            if (now - newBlog.timestamp < 5000) {
+                // Reload data untuk menampilkan blog baru
+                loadBlogs();
+            }
+        } catch (e) {
+            console.error('Error parsing newBlog:', e);
+        }
+        // Hapus data dari localStorage
+        localStorage.removeItem('newBlog');
+    }
 });
 </script>
 @endpush

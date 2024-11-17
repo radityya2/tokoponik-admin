@@ -1,11 +1,11 @@
 @extends('layout')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @section('title')
-    Data Product
+    Product Data
 @endsection
 
 @section('breadcrumb')
-<li class="breadcrumb-item active">Data Product</li>
+<li class="breadcrumb-item active">Product Data</li>
 @endsection
 
 @section('content')
@@ -52,38 +52,59 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Fungsi untuk memuat data produk
+        // Tambahkan fungsi filter table
+        function filterTable() {
+            var searchText = $("#searchInput").val().toLowerCase();
+            var typeFilter = $("#typeFilter").val().toLowerCase();
+
+            $("#productTable tbody tr").each(function() {
+                var name = $(this).find("td:eq(2)").text().toLowerCase();
+                var type = $(this).find("td:eq(5)").text().toLowerCase();
+
+                var matchSearch = name.includes(searchText);
+                var matchType = typeFilter === "" || type.includes(typeFilter);
+
+                if (matchSearch && matchType) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        // Tambahkan fungsi format number
+        function formatNumber(num) {
+            return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+        }
+
+        // Function to load products
         function loadProducts() {
             $.ajax({
                 url: 'http://127.0.0.1:8000/api/products',
                 method: 'GET',
                 success: function(response) {
-                    console.log('Response:', response); // Debug log
+                    console.log('API Response:', response);
                     var tbody = $('#productTable tbody');
                     tbody.empty();
 
                     if (response.data && response.data.length > 0) {
                         response.data.forEach(function(product, index) {
-                            console.log('Processing product:', product); // Debug log
-
-                            const imagePath = product.product_pics && product.product_pics.length > 0
-                                ? product.product_pics[0].path
-                                : null;
-
-                            console.log('Image path:', imagePath); // Debug log
+                            // Cek apakah product_pics ada dan memiliki data
+                            let imageUrl = '/storage/photos/default.jpg';
+                            if (product.product_pics && product.product_pics.length > 0) {
+                                imageUrl = product.product_pics[0].path || '/storage/photos/default.jpg';
+                            }
 
                             var row = `
                                 <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
                                     <td class="py-4 px-6">${index + 1}</td>
                                     <td class="py-4 px-6">
-                                        ${imagePath
-                                            ? `<img src="${imagePath}" alt="${product.name}"
-                                                 class="h-16 w-16 object-cover rounded"
-                                                 onerror="this.onerror=null; this.src='/storage/photos/default.jpg';">`
-                                            : `<div class="h-16 w-16 bg-gray-200 rounded flex items-center justify-center">
-                                                <span class="text-gray-500 text-xs">No image</span>
-                                               </div>`
-                                        }
+                                        <div class="h-16 w-16 bg-gray-100 rounded overflow-hidden">
+                                            <img src="${imageUrl}"
+                                                 alt="${product.name}"
+                                                 class="h-full w-full object-cover"
+                                                 onerror="this.onerror=null; this.src='/storage/photos/default.jpg';">
+                                        </div>
                                     </td>
                                     <td class="py-4 px-6">${product.name || '-'}</td>
                                     <td class="py-4 px-6">Rp ${formatNumber(product.price || 0)}</td>
@@ -95,7 +116,7 @@
                                     </td>
                                     <td class="py-4 px-6">
                                         <div class="flex items-center space-x-3">
-                                            <button onclick="editProduct(${product.id})" class="text-blue-500 hover:text-blue-700">
+                                            <button onclick="editProduct(${product.id})" class="text-forest-500 hover:text-yellow-500   ">
                                                 <i class="bi bi-pencil-square text-xl"></i>
                                             </button>
                                             <button onclick="deleteProduct(${product.id})" class="text-red-500 hover:text-red-700">
@@ -108,44 +129,19 @@
                             tbody.append(row);
                         });
                     } else {
-                        tbody.html('<tr><td colspan="7" class="text-center py-4">Tidak ada data produk</td></tr>');
+                        tbody.html('<tr><td colspan="7" class="text-center py-4">No product data available</td></tr>');
                     }
                 },
                 error: function(xhr) {
                     console.error('Error:', xhr);
-                    $('#productTable tbody').html('<tr><td colspan="7" class="text-center py-4 text-red-500">Error saat memuat data</td></tr>');
+                    $('#productTable tbody').html('<tr><td colspan="7" class="text-center py-4 text-red-500">Error loading data</td></tr>');
                 }
             });
         }
 
-        // Fungsi untuk filter tabel
-        function filterTable() {
-            var searchValue = $("#searchInput").val().toLowerCase();
-            var typeValue = $("#typeFilter").val().toLowerCase();
-
-            $("#productTable tbody tr").each(function() {
-                var row = $(this);
-                var name = row.find("td:eq(2)").text().toLowerCase();
-                var type = row.find("td:eq(5)").text().trim().toLowerCase();
-
-                var matchSearch = name.includes(searchValue);
-                var matchType = typeValue === "" || type.includes(typeValue);
-
-                row.toggle(matchSearch && matchType);
-            });
-        }
-
-        // Fungsi format angka
-        function formatNumber(number) {
-            return new Intl.NumberFormat('id-ID', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(number);
-        }
-
-        // Definisikan fungsi deleteProduct di scope global
+        // Delete product function
         window.deleteProduct = function(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+            if (confirm('Are you sure you want to delete this product?')) {
                 $.ajax({
                     url: `http://127.0.0.1:8000/api/products/${id}/destroy`,
                     method: 'DELETE',
@@ -158,13 +154,13 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
-                        alert('Gagal menghapus produk');
+                        alert('Failed to delete product');
                     }
                 });
             }
         };
 
-        // Tambahkan fungsi editProduct
+        // Edit product function
         window.editProduct = function(id) {
             $.ajax({
                 url: `http://127.0.0.1:8000/api/products/${id}`,
@@ -178,22 +174,61 @@
                         localStorage.setItem('editProduct', JSON.stringify(response.data));
                         window.location.href = `/product/${id}/edit`;
                     } else {
-                        alert('Data produk tidak ditemukan');
+                        alert('Product data not found');
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
-                    alert('Gagal mengambil data produk');
+                    alert('Failed to fetch product data');
                 }
             });
         };
 
-        // Event listeners untuk filter
+        // Event listeners for filter
         $("#searchInput").on("keyup", filterTable);
         $("#typeFilter").on("change", filterTable);
 
-        // Muat data saat halaman dimuat
+        // Load data when the page loads
         loadProducts();
+
+        // Cek apakah ada produk yang baru diupdate
+        const updatedProductStr = localStorage.getItem('updatedProduct');
+        if (updatedProductStr) {
+            try {
+                const updatedProduct = JSON.parse(updatedProductStr);
+
+                // Pastikan data masih fresh (kurang dari 5 detik)
+                const now = new Date().getTime();
+                if (now - updatedProduct.timestamp < 5000) { // 5 detik
+
+                    // Update gambar di index jika ada
+                    if (updatedProduct.product_pics && updatedProduct.product_pics.length > 0) {
+                        const productId = updatedProduct.id;
+                        const newImagePath = updatedProduct.product_pics[0].path;
+
+                        // Pastikan path gambar lengkap
+                        const baseUrl = 'http://127.0.0.1:8000';
+                        const fullImageUrl = newImagePath.startsWith('http') ?
+                            newImagePath :
+                            baseUrl + '/' + newImagePath;
+
+                        // Update gambar untuk produk ini
+                        $(`#productTable tbody tr`).each(function() {
+                            const row = $(this);
+                            const editButton = row.find('button[onclick^="editProduct"]');
+                            if (editButton.length && editButton.attr('onclick').includes(productId)) {
+                                row.find('img').attr('src', fullImageUrl);
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing updatedProduct:', e);
+            }
+
+            // Hapus data dari localStorage
+            localStorage.removeItem('updatedProduct');
+        }
     });
 
     function getTypeColor(type) {

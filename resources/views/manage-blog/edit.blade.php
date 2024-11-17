@@ -24,7 +24,7 @@
                     class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                     id="title"
                     name="title"
-                    placeholder="Masukkan judul blog">
+                    placeholder="Enter blog title">
                 <p class="text-red-500 text-xs mt-1" id="title-error"></p>
             </div>
 
@@ -34,7 +34,7 @@
                     class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                     id="description"
                     name="description"
-                    placeholder="Masukkan deskripsi blog"></textarea>
+                    placeholder="Enter blog description"></textarea>
                 <p class="text-red-500 text-xs mt-1" id="description-error"></p>
             </div>
 
@@ -49,7 +49,7 @@
 
                 <!-- Container untuk preview gambar -->
                 <div class="mt-4">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Gambar Saat Ini:</p>
+                    <p class="text-sm font-medium text-gray-700 mb-2">Current Image:</p>
                     <div class="relative">
                         <img id="current_image"
                              src=""
@@ -58,31 +58,9 @@
                              style="display: none;">
                         <p id="image_placeholder"
                            class="text-sm text-gray-500">
-                           Belum ada gambar
+                           No image available
                         </p>
                     </div>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-gray-800 text-sm font-semibold mb-3" for="blog_link">Link</label>
-                <input type="url"
-                    class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                    id="blog_link"
-                    name="blog_link"
-                    placeholder="Masukkan link blog">
-                <p class="text-red-500 text-xs mt-1" id="blog_link-error"></p>
-
-                <!-- Container untuk preview link -->
-                <div class="mt-2">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Link Saat Ini:</p>
-                    <a id="current_link"
-                       href=""
-                       target="_blank"
-                       class="text-blue-500 hover:text-blue-700 underline"
-                       style="display: none;">
-                        <i class="bi bi-link-45deg"></i> Link Blog
-                    </a>
                 </div>
             </div>
 
@@ -149,26 +127,13 @@ $(document).ready(function() {
                     .on('error', function() {
                         console.log('Image failed to load:', fullImageUrl);
                         $(this).hide();
-                        $('#image_placeholder').text('Gambar tidak dapat dimuat').show();
+                        $('#image_placeholder').text('Image cannot be loaded').show();
                     });
             } else {
                 $('#current_image').hide();
-                $('#image_placeholder').text('Belum ada gambar').show();
+                $('#image_placeholder').text('No image available').show();
             }
 
-            // Menampilkan link blog
-            if (blog.blog_links && blog.blog_links.length > 0) {
-                const blogLink = blog.blog_links[0].link;
-                $('#blog_link').val(blogLink);
-
-                $('#current_link')
-                    .attr('href', blogLink)
-                    .show()
-                    .html(`<i class="bi bi-link-45deg"></i> Link Blog: ${blogLink}`);
-            } else {
-                $('#blog_link').val('');
-                $('#current_link').hide();
-            }
         },
         error: function(xhr) {
             console.error('Error response:', xhr);
@@ -176,12 +141,12 @@ $(document).ready(function() {
                 localStorage.removeItem('token');
                 window.location.href = '/login';
             } else {
-                alert('Gagal mengambil data blog');
+                alert('Failed to fetch blog data');
             }
         }
     });
 
-    // Handle form submission
+    // Modifikasi bagian submit form
     $('#editBlogForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -189,11 +154,24 @@ $(document).ready(function() {
         $('.text-red-500').text('');
         $('input, textarea').removeClass('border-red-500');
 
-        // Client-side validation
+        // Create FormData object
+        const formData = new FormData();
+
+        // Tambahkan data ke FormData
+        formData.append('title', $('#title').val());
+        formData.append('description', $('#description').val());
+        formData.append('user_id', localStorage.getItem('user_id'));
+
+        // Tambahkan file gambar jika ada - ubah nama field menjadi 'photo'
+        const blogPicture = $('#blog_picture')[0].files[0];
+        if (blogPicture) {
+            formData.append('photo', blogPicture); // Ubah dari 'blog_picture' menjadi 'photo'
+        }
+
+        // Validasi client-side
         let isValid = true;
         const title = $('#title').val().trim();
         const description = $('#description').val().trim();
-        const blog_link = $('#blog_link').val().trim();
 
         if (!title) {
             $('#title-error').text('Judul blog harus diisi');
@@ -207,24 +185,14 @@ $(document).ready(function() {
             isValid = false;
         }
 
-        if (!blog_link) {
-            $('#blog_link-error').text('Link blog harus diisi');
-            $('#blog_link').addClass('border-red-500');
-            isValid = false;
-        }
-
         if (!isValid) return;
 
         // Disable submit button
         const submitBtn = $('#submitBtn');
-        const originalText = submitBtn.html();
-        submitBtn.prop('disabled', true).html('<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...');
+        submitBtn.prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
 
-        // Create FormData object
-        const formData = new FormData(this);
-        formData.append('_method', 'PUT'); // untuk method PUT
-        formData.append('user_id', localStorage.getItem('user_id'));
-
+        // Kirim request ke API
         $.ajax({
             url: `http://127.0.0.1:8000/api/auth/blogs/${blogId}/update`,
             method: 'POST',
@@ -236,6 +204,18 @@ $(document).ready(function() {
             processData: false,
             contentType: false,
             success: function(response) {
+                console.log('Success response:', response);
+
+                // Simpan data blog yang diperbarui ke localStorage dengan format yang benar
+                if (response.data) {
+                    const updatedBlogData = {
+                        id: response.data.id,
+                        blog_pics: response.data.blog_pics,
+                        timestamp: new Date().getTime() // Tambahkan timestamp
+                    };
+                    localStorage.setItem('updatedBlog', JSON.stringify(updatedBlogData));
+                }
+
                 Swal.fire({
                     title: 'Success!',
                     text: 'Blog has been successfully updated',
@@ -247,8 +227,12 @@ $(document).ready(function() {
                     }
                 });
             },
-            error: function(xhr) {
-                submitBtn.prop('disabled', false).html(originalText);
+            error: function(xhr, status, error) {
+                console.error('Error response:', xhr);
+                console.error('Status:', status);
+                console.error('Error:', error);
+
+                submitBtn.prop('disabled', false).html('Submit');
 
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
@@ -260,7 +244,12 @@ $(document).ready(function() {
                     localStorage.removeItem('token');
                     window.location.href = '/login';
                 } else {
-                    alert('Terjadi kesalahan saat memperbarui blog');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat memperbarui blog',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             }
         });

@@ -44,37 +44,22 @@
                 <input type="file"
                     class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                     id="photos"
-                    name="photos[]"
+                    name="photos"
                     accept="image/jpeg,image/png,image/jpg"
-                    multiple>
+                    required>
+
                 <p class="text-red-500 text-xs mt-1 error-message" id="photos-error"></p>
                 <div id="preview" class="mt-2 flex flex-wrap gap-2"></div>
             </div>
 
-            <div id="linkContainer">
-                <div class="mb-6">
-                    <label class="block text-gray-800 text-sm font-semibold mb-3">Links</label>
-                    <div class="flex gap-2">
-                        <input type="url"
-                            class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                            name="links[]"
-                            placeholder="Masukkan link blog">
-                        <button type="button" onclick="addLinkField()" class="px-4 py-2 bg-green-500 text-white rounded-lg">
-                            +
-                        </button>
-                    </div>
-                    <p class="text-red-500 text-xs mt-1 error-message" id="links-error"></p>
-                </div>
-            </div>
-
             <div class="flex gap-4 mt-8">
-                <button type="submit" id="submitBtn" class="flex items-center px-6 py-2.5 bg-green-800 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                <button type="submit" class="flex items-center px-6 py-2.5 bg-green-800 text-white rounded-lg hover:bg-green-600">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                     Submit
                 </button>
-                <a href="{{ route('blog.index') }}" class="flex items-center px-6 py-2.5 bg-red-700 text-white rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                <a href="{{ route('blog.index') }}" class="flex items-center px-6 py-2.5 bg-red-700 text-white rounded-lg hover:bg-red-800">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
@@ -89,143 +74,145 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Fungsi untuk menambah field link
-function addLinkField() {
-    const container = document.createElement('div');
-    container.className = 'mb-6';
-    container.innerHTML = `
-        <div class="flex gap-2">
-            <input type="url"
-                class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                name="links[]"
-                placeholder="Masukkan link blog">
-            <button type="button" onclick="this.parentElement.remove()" class="px-4 py-2 bg-red-500 text-white rounded-lg">
-                -
-            </button>
-        </div>
-    `;
-    document.getElementById('linkContainer').appendChild(container);
-}
 
-// Preview gambar sebelum upload
-function previewImages(event) {
-    const preview = document.getElementById('preview');
-    preview.innerHTML = '';
 
-    const files = event.target.files;
+// Handle preview gambar
+$('#photos').on('change', function(e) {
+    const files = e.target.files;
 
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith('image/')) continue;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const div = document.createElement('div');
-            div.className = 'relative';
-            div.innerHTML = `
-                <img src="${e.target.result}" class="h-20 w-20 object-cover rounded">
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
-                    ×
-                </button>
-            `;
-            preview.appendChild(div);
-        }
-        reader.readAsDataURL(file);
-    }
-}
-
-// Event listener untuk preview gambar
-document.getElementById('photos').addEventListener('change', previewImages);
-
-$(document).ready(function() {
-    // Cek token saat halaman dimuat
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/login';
+    if (!validateFiles(files)) {
+        this.value = '';
+        $('#preview').empty();
         return;
     }
 
-    $('#createBlogForm').on('submit', function(e) {
-        e.preventDefault();
-        console.log('Form submitted'); // Debug
+    const preview = $('#preview');
+    preview.empty();
 
-        const token = localStorage.getItem('token');
-        const formData = new FormData(this);
-
-        // Debug form data
-        for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.append(`
+                <div class="relative">
+                    <img src="${e.target.result}" class="h-20 w-20 object-cover rounded">
+                    <button type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                            onclick="$(this).parent().remove()">×</button>
+                </div>
+            `);
         }
+        reader.readAsDataURL(file);
+    });
+});
 
-        // Client-side validation
-        let isValid = true;
-        const title = $('#title').val().trim();
-        const description = $('#description').val().trim();
+// Handle submit form
+$('#createBlogForm').on('submit', function(e) {
+    e.preventDefault();
 
-        if (!title) {
-            $('#title-error').text('Judul blog harus diisi');
-            $('#title').addClass('border-red-500');
-            isValid = false;
-        }
+    // Reset error messages
+    $('.error-message').text('');
+    $('input, textarea').removeClass('border-red-500');
 
-        if (!description) {
-            $('#description-error').text('Deskripsi blog harus diisi');
-            $('#description').addClass('border-red-500');
-            isValid = false;
-        }
+    // Validasi client-side
+    let isValid = true;
+    const title = $('#title').val().trim();
+    const description = $('#description').val().trim();
+    const file = $('#photos')[0].files[0];
 
-        if (!isValid) return false;
+    if (!title) {
+        $('#title-error').text('Judul blog harus diisi');
+        $('#title').addClass('border-red-500');
+        isValid = false;
+    }
 
-        // Kirim request ke API
-        $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/blogs/store',
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                console.log('Success:', response);
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Blog has been successfully added',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/blog';
-                    }
-                });
-            },
-            error: function(xhr, status, error) {
-                console.log('Error Status:', xhr.status);
-                console.log('Error Response:', xhr.responseText);
+    if (!description) {
+        $('#description-error').text('Deskripsi blog harus diisi');
+        $('#description').addClass('border-red-500');
+        isValid = false;
+    }
 
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    Object.keys(errors).forEach(function(key) {
-                        $(`#${key}-error`).text(errors[key][0]);
+    if (!file) {
+        $('#photo-error').text('Foto harus diupload');
+        $('#photo').addClass('border-red-500');
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('photo', file);
+    formData.append('user_id', localStorage.getItem('user_id'));
+
+    const token = localStorage.getItem('token');
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/auth/blogs/store',
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+        },
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            console.log('Success response:', response);
+
+            // Simpan data blog yang baru dibuat ke localStorage
+            const blogData = {
+                id: response.data.id,
+                blog_pics: response.data.blog_pics,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem('newBlog', JSON.stringify(blogData));
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Blog has been successfully added',
+                icon: 'success'
+            }).then(() => {
+                window.location.href = '/blog';
+            });
+        },
+        error: function(xhr) {
+            console.log('Error Response:', xhr.responseText);
+
+            if (xhr.status === 422 || xhr.status === 400) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    const errors = response.errors || {};
+
+                    Object.keys(errors).forEach(key => {
+                        const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                        $(`#${key}-error`).text(errorMsg);
                         $(`#${key}`).addClass('border-red-500');
                     });
-                } else {
-                    alert('Terjadi kesalahan saat menyimpan blog');
+                } catch (e) {
+                    console.error('Error parsing response:', e);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat memproses response',
+                        icon: 'error'
+                    });
                 }
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan saat menyimpan blog',
+                    icon: 'error'
+                });
             }
-        });
+        }
     });
+});
 
-    // Reset error state saat input berubah
-    $('input, textarea').on('input', function() {
-        $(this).removeClass('border-red-500');
-        const name = $(this).attr('name');
-        const baseKey = name.replace('[]', '');
-        $(`#${baseKey}-error`).text('');
-    });
+// Cek token saat halaman dimuat
+$(document).ready(function() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+    }
 });
 </script>
 @endpush

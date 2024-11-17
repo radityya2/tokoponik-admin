@@ -134,6 +134,9 @@
             categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
         },
         yaxis: {
+            min: 0,
+            max: 10000000,
+            tickAmount: 5, // Akan menghasilkan 6 titik (termasuk 0)
             labels: {
                 formatter: function (value) {
                     return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
