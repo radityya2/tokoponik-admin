@@ -5,11 +5,15 @@
 "routes": [
     { "src": "/(.*)", "dest": "/api/index.php" }
 ],
+"builds": [
+    { "src": "api/index.php", "use": "@vercel/php" },
+    { "src": "public/**", "use": "@vercel/static" }
+],
 "env": {
     "APP_NAME": "Laravel",
     "APP_ENV": "production",
     "APP_DEBUG": "false",
-    "APP_URL": "https://tokoponik-admin-g4sx.vercel.app",
+    "APP_URL": "https://tokoponik-admin-38zt3vtrm-raditya2s-projects.vercel.app",
     "APP_KEY": "base64:0Y8IwYHrcbOrqCOUIytZmWrKQTC/zG9kFqwPs8sULbA=",
 
     "APP_CONFIG_CACHE": "/tmp/config.php",
@@ -22,13 +26,6 @@
     "CACHE_DRIVER": "array",
     "LOG_CHANNEL": "stderr",
     "SESSION_DRIVER": "cookie",
-
-    "DB_CONNECTION": "mysql",
-    "DB_HOST": "4gg.h.filess.io",
-    "DB_PORT": "3306",
-    "DB_DATABASE": "restapi_tokoponik",
-    "DB_USERNAME": "root",
-    "DB_PASSWORD": "",
 
     "BASE_URL": "https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net"
     }
