@@ -6,11 +6,15 @@
     { "src": "/build/(.*)", "dest": "/public/build/" },
     { "src": "/(.*)", "dest": "/api/index.php" }
 ],
-
+"public": true,
+"buildCommand": "composer install --no-dev && php artisan config:cache && vite build",
+"outputDirectory": "public",
 "env": {
+    "APP_NAME": "Laravel",
     "APP_ENV": "production",
-    "APP_DEBUG": "true",
-    "APP_URL": "https://tokoponik-admin.vercel.app",
+    "APP_DEBUG": "false",
+    "APP_URL": "https://tokoponik-admin-jzz6desrj-raditya2s-projects.vercel.app",
+    "APP_KEY": "base64:0Y8IwYHrcbOrqCOUIytZmWrKQTC/zG9kFqwPs8sULbA=",
 
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
@@ -21,7 +25,9 @@
 
     "CACHE_DRIVER": "array",
     "LOG_CHANNEL": "stderr",
-    "SESSION_DRIVER": "cookie"
+    "SESSION_DRIVER": "cookie",
+
+    "BASE_URL": "https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net"
     },
     "outputDirectory": "public"
 }
