@@ -14,10 +14,8 @@
         <div class="flex items-center space-x-6">
             <input type="text"
                 id="searchInput"
-                placeholder="Search for transactions"
-                class="bg-white border border-pastel-200 text-forest-600 px-5 py-2.5 rounded-lg focus:outline-none focus:border-forest-500">
-
-
+                placeholder="Search by username"
+                class="bg-white border border-pastel-200 text-forest-600 px-6 py-2.5 rounded-lg focus:outline-none focus:border-forest-500">
         </div>
     </div>
 
@@ -47,11 +45,28 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
+    // Tambahkan event listener untuk input pencarian
+    $('#searchInput').on('keyup', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        filterTransactions(searchTerm);
+    });
+
+    function filterTransactions(searchTerm) {
+        $('#transactionTableBody tr').each(function() {
+            const username = $(this).find('td:eq(1)').text().toLowerCase();
+            if (username.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
     function loadTransactions() {
         const token = localStorage.getItem('token');
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/transactions',
+            url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/transactions',
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -120,7 +135,7 @@ $(document).ready(function() {
                     localStorage.removeItem('token');
                     window.location.href = '/login';
                 } else {
-                    $('#transactionTableBody').html('<tr><td colspan="7" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
+                    $('#transactionTableBody').html('<tr><td colspan="7" class="text-center py-8 text-red-500">Error loading data</td></tr>');
                 }
             }
         });
@@ -157,7 +172,7 @@ $(document).ready(function() {
         }
 
         // Pastikan path lengkap
-        const baseUrl = 'http://127.0.0.1:8000';
+        const baseUrl = 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net';
         const fullImageUrl = proofPath.startsWith('http') ? proofPath : baseUrl + proofPath;
 
         // Cek apakah gambar bisa dimuat
@@ -190,7 +205,7 @@ $(document).ready(function() {
         const token = localStorage.getItem('token');
 
         $.ajax({
-            url: `http://127.0.0.1:8000/api/auth/transactions/${transactionId}/update-status`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/transactions/${transactionId}/update-status`,
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -240,7 +255,7 @@ $(document).ready(function() {
                 const token = localStorage.getItem('token');
 
                 $.ajax({
-                    url: `http://127.0.0.1:8000/api/auth/transactions/${id}/destroy`,
+                    url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/transactions/${id}/destroy`,
                     method: 'DELETE',
                     headers: {
                         'Authorization': 'Bearer ' + token,

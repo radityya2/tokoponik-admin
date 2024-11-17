@@ -118,7 +118,7 @@ $(document).ready(function() {
 
     // Ambil data produk dari API
     $.ajax({
-        url: `http://127.0.0.1:8000/api/products/${productId}`,
+        url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/products/${productId}`,
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -137,7 +137,7 @@ $(document).ready(function() {
 
                 if (response.data.product_pics && response.data.product_pics.length > 0) {
                     response.data.product_pics.forEach(pic => {
-                        const baseUrl = 'http://127.0.0.1:8000';
+                        const baseUrl = 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net';
                         const fullImageUrl = pic.path.startsWith('http') ? pic.path : baseUrl + pic.path;
 
                         const div = document.createElement('div');
@@ -151,7 +151,7 @@ $(document).ready(function() {
                         existingImages.appendChild(div);
                     });
                 } else {
-                    existingImages.innerHTML = '<div class="text-sm text-gray-500">Tidak ada gambar tersedia</div>';
+                    existingImages.innerHTML = '<div class="text-sm text-gray-500">No image available</div>';
                 }
             }
         },
@@ -181,7 +181,7 @@ $(document).ready(function() {
         submitBtn.prop('disabled', true).text('Processing...');
 
         $.ajax({
-            url: `http://127.0.0.1:8000/api/products/${productId}/update`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/products/${productId}/update`,
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -220,7 +220,7 @@ $(document).ready(function() {
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                     alert(xhr.responseJSON.message);
                 } else {
-                    alert('Gagal memperbarui produk. Silakan coba lagi.');
+                    alert('Failed to update product. Please try again.');
                 }
             }
         });

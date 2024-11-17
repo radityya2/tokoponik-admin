@@ -125,7 +125,7 @@ $(document).ready(function() {
 
     // Ambil data user terlebih dahulu
     $.ajax({
-        url: `http://127.0.0.1:8000/api/auth/users/${userId}`,
+        url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/users/${userId}`,
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -142,7 +142,7 @@ $(document).ready(function() {
         },
         error: function(xhr) {
             console.error('Error:', xhr);
-            alert('Gagal mengambil data user');
+            alert('Failed to fetch user data');
             window.location.href = '/user';
         }
     });
@@ -174,7 +174,7 @@ $(document).ready(function() {
         submitBtn.prop('disabled', true).text('Memperbarui...');
 
         $.ajax({
-            url: `http://127.0.0.1:8000/api/auth/users/${userId}/update`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/users/${userId}/update`,
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -215,7 +215,7 @@ $(document).ready(function() {
                 } else if (response && response.message) {
                     alert(response.message);
                 } else {
-                    alert('Gagal memperbarui data. Silakan coba lagi.');
+                    alert('Failed to update data. Please try again.');
                 }
             }
         });

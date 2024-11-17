@@ -161,7 +161,7 @@
         const token = localStorage.getItem('token');
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/transactions',
+            url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/transactions',
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -182,7 +182,7 @@
         });
 
         $.ajax({
-        url: 'http://127.0.0.1:8000/api/auth/users',
+        url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/users',
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -200,7 +200,7 @@
     });
 
     $.ajax({
-        url: 'http://127.0.0.1:8000/api/products',
+        url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/products',
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -219,7 +219,7 @@
     });
 
     $.ajax({
-        url: 'http://127.0.0.1:8000/api/auth/blogs',
+        url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/blogs',
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -237,7 +237,7 @@
     });
 
     $.ajax({
-        url: 'http://127.0.0.1:8000/api/auth/transactions',
+        url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/transactions',
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,

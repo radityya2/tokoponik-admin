@@ -93,7 +93,7 @@ $(document).ready(function() {
 
     // Fetch blog data
     $.ajax({
-        url: `http://127.0.0.1:8000/api/auth/blogs/${blogId}`,
+        url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/blogs/${blogId}`,
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -113,7 +113,7 @@ $(document).ready(function() {
                 console.log('Image path:', imagePath);
 
                 // Pastikan path gambar lengkap
-                const baseUrl = 'http://127.0.0.1:8000';
+                const baseUrl = 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net';
                 const fullImageUrl = imagePath.startsWith('http') ? imagePath : baseUrl + imagePath;
                 console.log('Full image URL:', fullImageUrl);
 
@@ -194,7 +194,7 @@ $(document).ready(function() {
 
         // Kirim request ke API
         $.ajax({
-            url: `http://127.0.0.1:8000/api/auth/blogs/${blogId}/update`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/blogs/${blogId}/update`,
             method: 'POST',
             data: formData,
             headers: {

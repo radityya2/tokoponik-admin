@@ -102,15 +102,21 @@
     @stack('scripts')  <!-- Pastikan ini ada -->
     <script>
     $(document).ready(function() {
-        // Cek apakah sedang di halaman login
-        if (window.location.pathname === '/login') {
+        // Daftar route yang tidak memerlukan token
+        const publicRoutes = ['/login', '/register'];
+        const currentPath = window.location.pathname;
+
+        // Tambahkan definisi userId
+        const userId = localStorage.getItem('user_id');
+        const token = localStorage.getItem('token');
+
+        // Skip pengecekan untuk public routes
+        if (publicRoutes.includes(currentPath)) {
             return;
         }
 
-        const token = localStorage.getItem('token');
-        const userId = localStorage.getItem('user_id');
-
         if (!token || !userId) {
+            console.log('Token atau userId tidak ditemukan'); 
             window.location.href = '/login';
             return;
         }
@@ -125,7 +131,7 @@
 
         // Ambil data user untuk header
         $.ajax({
-            url: `http://127.0.0.1:8000/api/auth/users/id/info`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/users/id/info`,
             method: 'GET',
             success: function(response) {
                 if (response.status === 200) {
@@ -147,11 +153,29 @@
         console.log('User ID:', userId);
         console.log('Token:', token);
 
-        // Handle logout
+        // Handle logout dengan konfirmasi dan API call
         $('.logout-btn').click(function(e) {
             e.preventDefault();
-            localStorage.removeItem('token');
-            window.location.href = '/login';
+
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                $.ajax({
+                    url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/logout',
+                    method: 'POST',
+                    success: function(response) {
+                        console.log('Berhasil logout');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user_id');
+                        window.location.href = '/login';
+                    },
+                    error: function(xhr) {
+                        console.error('Gagal logout:', xhr);
+                        // Tetap logout dari sisi client
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user_id');
+                        window.location.href = '/login';
+                    }
+                });
+            }
         });
     });
 

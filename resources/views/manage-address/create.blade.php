@@ -124,7 +124,7 @@ $(document).ready(function() {
         if (!isValid) return;
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/addresses/store',
+            url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/addresses/store',
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

@@ -80,7 +80,7 @@
         // Function to load products
         function loadProducts() {
             $.ajax({
-                url: 'http://127.0.0.1:8000/api/products',
+                url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/products',
                 method: 'GET',
                 success: function(response) {
                     console.log('API Response:', response);
@@ -89,10 +89,26 @@
 
                     if (response.data && response.data.length > 0) {
                         response.data.forEach(function(product, index) {
-                            // Cek apakah product_pics ada dan memiliki data
-                            let imageUrl = '/storage/photos/default.jpg';
+                            // Debug untuk melihat data produk dan gambar
+                            console.log('Product ID:', product.id);
+                            console.log('Product Images:', product.product_pics);
+
+                            // Ambil URL gambar dari API
+                            let imageUrl;
                             if (product.product_pics && product.product_pics.length > 0) {
-                                imageUrl = product.product_pics[0].path || '/storage/photos/default.jpg';
+                                const picPath = product.product_pics[0].path;
+
+                                // Jika path sudah lengkap dengan domain, gunakan langsung
+                                if (picPath.startsWith('http')) {
+                                    imageUrl = picPath;
+                                } else {
+                                    // Jika tidak, tambahkan domain API
+                                    imageUrl = `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net${picPath}`;
+                                }
+
+                                console.log('Final Image URL:', imageUrl);
+                            } else {
+                                imageUrl = 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/storage/photos/default.jpg';
                             }
 
                             var row = `
@@ -103,7 +119,7 @@
                                             <img src="${imageUrl}"
                                                  alt="${product.name}"
                                                  class="h-full w-full object-cover"
-                                                 onerror="this.onerror=null; this.src='/storage/photos/default.jpg';">
+                                                 onerror="this.onerror=null; this.src='https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/storage/photos/default.jpg';">
                                         </div>
                                     </td>
                                     <td class="py-4 px-6">${product.name || '-'}</td>
@@ -129,11 +145,11 @@
                             tbody.append(row);
                         });
                     } else {
-                        tbody.html('<tr><td colspan="7" class="text-center py-4">No product data available</td></tr>');
+                        tbody.html('<tr><td colspan="7" class="text-center py-8 text-gray-500">No data exists</td></tr>');
                     }
                 },
                 error: function(xhr) {
-                    console.error('Error:', xhr);
+                    console.error('API Error:', xhr);
                     $('#productTable tbody').html('<tr><td colspan="7" class="text-center py-4 text-red-500">Error loading data</td></tr>');
                 }
             });
@@ -143,7 +159,7 @@
         window.deleteProduct = function(id) {
             if (confirm('Are you sure you want to delete this product?')) {
                 $.ajax({
-                    url: `http://127.0.0.1:8000/api/products/${id}/destroy`,
+                    url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/products/${id}/destroy`,
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -163,7 +179,7 @@
         // Edit product function
         window.editProduct = function(id) {
             $.ajax({
-                url: `http://127.0.0.1:8000/api/products/${id}`,
+                url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/products/${id}`,
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -207,7 +223,7 @@
                         const newImagePath = updatedProduct.product_pics[0].path;
 
                         // Pastikan path gambar lengkap
-                        const baseUrl = 'http://127.0.0.1:8000';
+                        const baseUrl = 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net';
                         const fullImageUrl = newImagePath.startsWith('http') ?
                             newImagePath :
                             baseUrl + '/' + newImagePath;

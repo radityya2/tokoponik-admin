@@ -89,7 +89,7 @@ $(document).ready(function() {
     // Fetch data alamat yang akan diedit
     $.ajax({
         type: 'GET',
-        url: `http://127.0.0.1:8000/api/auth/addresses/${addressId}`,
+        url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/addresses/${addressId}`,
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
@@ -134,7 +134,7 @@ $(document).ready(function() {
 
         $.ajax({
             type: 'POST',
-            url: `http://127.0.0.1:8000/api/auth/addresses/${addressId}/update`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/addresses/${addressId}/update`,
             data: JSON.stringify(formData),
             contentType: 'application/json',
             headers: {

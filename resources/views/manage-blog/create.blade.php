@@ -104,8 +104,54 @@ $('#photos').on('change', function(e) {
     });
 });
 
+function compressImage(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Set ukuran maksimal
+                const MAX_WIDTH = 1024;
+                const MAX_HEIGHT = 1024;
+
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    resolve(new File([blob], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    }));
+                }, 'image/jpeg', 0.7); // Kompresi dengan quality 0.7
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 // Handle submit form
-$('#createBlogForm').on('submit', function(e) {
+$('#createBlogForm').on('submit', async function(e) {
     e.preventDefault();
 
     // Reset error messages
@@ -116,7 +162,7 @@ $('#createBlogForm').on('submit', function(e) {
     let isValid = true;
     const title = $('#title').val().trim();
     const description = $('#description').val().trim();
-    const file = $('#photos')[0].files[0];
+    const photo = $('#photos')[0].files[0];
 
     if (!title) {
         $('#title-error').text('Judul blog harus diisi');
@@ -130,7 +176,7 @@ $('#createBlogForm').on('submit', function(e) {
         isValid = false;
     }
 
-    if (!file) {
+    if (!photo) {
         $('#photo-error').text('Foto harus diupload');
         $('#photo').addClass('border-red-500');
         isValid = false;
@@ -141,13 +187,18 @@ $('#createBlogForm').on('submit', function(e) {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    formData.append('photo', file);
+
+    if (photo) {
+        const compressedPhoto = await compressImage(photo);
+        formData.append('photo', compressedPhoto);
+    }
+
     formData.append('user_id', localStorage.getItem('user_id'));
 
     const token = localStorage.getItem('token');
 
     $.ajax({
-        url: 'http://127.0.0.1:8000/api/auth/blogs/store',
+        url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/blogs/store',
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -192,14 +243,14 @@ $('#createBlogForm').on('submit', function(e) {
                     console.error('Error parsing response:', e);
                     Swal.fire({
                         title: 'Error!',
-                        text: 'Terjadi kesalahan saat memproses response',
+                        text: 'An error occurred while processing the response',
                         icon: 'error'
                     });
                 }
             } else {
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Terjadi kesalahan saat menyimpan blog',
+                    text: 'An error occurred while saving the blog',
                     icon: 'error'
                 });
             }

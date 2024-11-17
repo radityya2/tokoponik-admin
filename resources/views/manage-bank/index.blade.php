@@ -75,7 +75,7 @@
             const token = localStorage.getItem('token');
 
             $.ajax({
-                url: 'http://127.0.0.1:8000/api/auth/banks',
+                url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/banks',
                 method: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -121,7 +121,7 @@
                         localStorage.removeItem('token');
                         window.location.href = '/login';
                     } else {
-                        $('#bankTableBody').html('<tr><td colspan="5" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
+                        $('#bankTableBody').html('<tr><td colspan="5" class="text-center py-8 text-red-500">Error when loading data</td></tr>');
                     }
                 }
             });
@@ -133,7 +133,7 @@
                 const token = localStorage.getItem('token');
 
                 $.ajax({
-                    url: `http://127.0.0.1:8000/api/auth/banks/${id}/destroy`,
+                    url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/banks/${id}/destroy`,
                     method: 'DELETE',
                     headers: {
                         'Authorization': 'Bearer ' + token,
@@ -158,7 +158,36 @@
 
         // Fungsi untuk edit bank
         window.editBank = function(id) {
-            window.location.href = `/bank/${id}/edit`;
+            const token = localStorage.getItem('token');
+            console.log('Token saat edit:', token); // Debugging
+
+            if (!token) {
+                console.log('Token tidak ditemukan'); // Debugging
+                window.location.href = '/login';
+                return;
+            }
+
+            $.ajax({
+                url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/banks/${id}`,
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/json'
+                },
+                success: function(response) {
+                    console.log('Edit berhasil:', response); // Debugging
+                    window.location.href = `/bank/${id}/edit`;
+                },
+                error: function(xhr) {
+                    console.error('Edit error:', xhr); // Debugging
+                    if (xhr.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = '/login';
+                    } else {
+                        alert('Terjadi kesalahan saat mengakses data bank');
+                    }
+                }
+            });
         }
 
         // Fungsi pencarian (menggunakan fungsi yang sudah ada)

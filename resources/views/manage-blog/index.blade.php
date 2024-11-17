@@ -52,7 +52,7 @@ $(document).ready(function() {
     // Fungsi untuk memuat data blog
     function loadBlogs() {
         const token = localStorage.getItem('token');
-        const baseUrl = 'http://127.0.0.1:8000';
+        const baseUrl = 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net';
 
         $.ajax({
             url: `${baseUrl}/api/auth/blogs`,
@@ -114,7 +114,7 @@ $(document).ready(function() {
                         tbody.append(row);
                     });
                 } else {
-                    tbody.html('<tr><td colspan="5" class="text-center py-8 text-gray-500">Tidak ada data</td></tr>');
+                    tbody.html('<tr><td colspan="5" class="text-center py-8 text-gray-500">No data exists</td></tr>');
                 }
             },
             error: function(xhr) {
@@ -123,7 +123,7 @@ $(document).ready(function() {
                     localStorage.removeItem('token');
                     window.location.href = '/login';
                 } else {
-                    $('#blogTableBody').html('<tr><td colspan="5" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
+                    $('#blogTableBody').html('<tr><td colspan="5" class="text-center py-8 text-red-500">Error loading data</td></tr>');
                 }
             }
         });
@@ -131,11 +131,11 @@ $(document).ready(function() {
 
     // Fungsi untuk menghapus blog
     window.deleteBlog = function(id) {
-        if (confirm('Yakin ingin menghapus blog ini?')) {
+        if (confirm('Are you sure you want to delete this blog?')) {
             const token = localStorage.getItem('token');
 
             $.ajax({
-                url: `http://127.0.0.1:8000/api/auth/blogs/${id}/destroy`,
+                url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/blogs/${id}/destroy`,
                 method: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -151,7 +151,7 @@ $(document).ready(function() {
                         localStorage.removeItem('token');
                         window.location.href = '/login';
                     } else {
-                        alert('Gagal menghapus blog: ' + (xhr.responseJSON?.message || 'Terjadi kesalahan'));
+                        alert('Failed to delete blog: ' + (xhr.responseJSON?.message || 'An error occurred'));
                     }
                 }
             });
@@ -190,7 +190,7 @@ $(document).ready(function() {
                     const newImagePath = updatedBlog.blog_pics[0].pic_path;
 
                     // Pastikan path gambar lengkap
-                    const baseUrl = 'http://127.0.0.1:8000';
+                    const baseUrl = 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net';
                     const fullImageUrl = newImagePath.startsWith('http') ?
                         newImagePath :
                         baseUrl + '/' + newImagePath;

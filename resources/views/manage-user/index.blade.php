@@ -50,7 +50,7 @@ $(document).ready(function() {
         const token = localStorage.getItem('token');
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/users',
+            url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/users',
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -105,11 +105,11 @@ $(document).ready(function() {
 
     // Fungsi untuk menghapus user
     window.deleteUser = function(id) {
-        if (confirm('Yakin ingin menghapus user ini?')) {
+        if (confirm('Are you sure you want to delete this user?')) {
             const token = localStorage.getItem('token');
 
             $.ajax({
-                url: `http://127.0.0.1:8000/api/auth/users/${id}/destroy`,
+                url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/users/${id}/destroy`,
                 method: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -127,7 +127,7 @@ $(document).ready(function() {
                         localStorage.removeItem('token');
                         window.location.href = '/login';
                     } else {
-                        alert('Gagal menghapus user: ' + (xhr.responseJSON?.message || 'Terjadi kesalahan'));
+                        alert('Failed to delete user: ' + (xhr.responseJSON?.message || 'An error occurred'));
                     }
                 }
             });

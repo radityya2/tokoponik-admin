@@ -57,18 +57,27 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
-    const bankId = window.location.pathname.split('/')[2];
     const token = localStorage.getItem('token');
+    console.log('Token di halaman edit:', token); // Debugging
 
-    // Ambil data bank yang akan diedit
+    if (!token) {
+        console.log('Token tidak ditemukan di halaman edit'); // Debugging
+        window.location.href = '/login';
+        return;
+    }
+
+    const bankId = window.location.pathname.split('/')[2];
+
+    // Ambil data bank
     $.ajax({
-        url: `http://127.0.0.1:8000/api/auth/banks/${bankId}`,
+        url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/banks/${bankId}`,
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
             'Accept': 'application/json'
         },
         success: function(response) {
+            console.log('Data bank berhasil diambil:', response); // Debugging
             if (response.data) {
                 $('#owner_name').val(response.data.owner_name || '');
                 $('#bank_name').val(response.data.bank_name || '');
@@ -76,13 +85,10 @@ $(document).ready(function() {
             }
         },
         error: function(xhr) {
-            console.error('Error:', xhr);
+            console.error('Error mengambil data bank:', xhr); // Debugging
             if (xhr.status === 401) {
                 localStorage.removeItem('token');
                 window.location.href = '/login';
-            } else {
-                alert('Gagal mengambil data bank');
-                window.location.href = '/bank';
             }
         }
     });
@@ -123,10 +129,10 @@ $(document).ready(function() {
 
         const submitBtn = $('#submitBtn');
         const originalText = submitBtn.html();
-        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Saving...');
 
         $.ajax({
-            url: `http://127.0.0.1:8000/api/auth/banks/${bankId}/update`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/banks/${bankId}/update`,
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -176,5 +182,21 @@ $(document).ready(function() {
         $(`#${$(this).attr('id')}-error`).text('');
     });
 });
+
+window.editBank = function(id) {
+    $.ajax({
+        url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/banks/${id}`,
+        method: 'GET',
+        success: function(response) {
+            window.location.href = `/bank/${id}/edit`;
+        },
+        error: function(xhr) {
+            if (xhr.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        }
+    });
+}
 </script>
 @endpush

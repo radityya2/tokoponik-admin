@@ -126,7 +126,7 @@ $(document).ready(function() {
 
         // Kirim request ke API
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/users/store',
+            url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/users/store',
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -160,7 +160,7 @@ $(document).ready(function() {
                         $(`#${key}`).after(`<p class="text-red-500 text-xs mt-1">${errorMessage}</p>`);
                     });
                 } else {
-                    alert('Terjadi kesalahan saat menyimpan data');
+                    alert('An error occurred while saving data');
                 }
             }
         });

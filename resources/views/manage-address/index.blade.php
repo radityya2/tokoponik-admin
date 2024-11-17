@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         // Ubah endpoint untuk mengambil address berdasarkan user_id dari parameter
-        const apiUrl = `http://127.0.0.1:8000/api/auth/addresses/user/${userId}`;
+        const apiUrl = `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/addresses/id/user`;
 
         $.ajax({
             url: apiUrl,
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="9" class="text-center py-4">Tidak ada data alamat</td>
+                            <td colspan="9" class="text-center py-4">No data exists</td>
                         </tr>
                     `;
                 }
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         $.ajax({
-            url: `http://127.0.0.1:8000/api/auth/addresses/${addressId}/destroy`,
+            url: `https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/addresses/${addressId}/destroy`,
             type: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,

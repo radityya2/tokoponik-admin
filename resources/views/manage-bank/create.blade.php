@@ -102,12 +102,12 @@ $(document).ready(function() {
 
         const submitBtn = $('#submitBtn');
         const originalText = submitBtn.html();
-        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Saving...');
 
         const token = localStorage.getItem('token');
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/auth/banks/store',
+            url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/auth/banks/store',
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,

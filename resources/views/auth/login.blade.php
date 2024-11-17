@@ -15,7 +15,7 @@
             <div class="text-center mb-8">
                 <div class="flex items-center justify-center gap-3 mb-6">
                     <div class="bg-forest-700 p-2 rounded-lg">
-                        <img src="assets/img/logo.png" alt="Logo" class="w-8 h-8">
+                        <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="w-8 h-8">
                     </div>
                     <span class="text-2xl font-bold text-forest-700">Tokoponik</span>
                 </div>
@@ -60,18 +60,8 @@
             const username = $('#username').val();
             const password = $('#password').val();
 
-            // Reset error message
-            $('#errorAlert').addClass('hidden').text('');
-
-            // Tambahkan header CSRF
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
             $.ajax({
-                url: 'http://127.0.0.1:8000/api/login',
+                url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/login',
                 method: 'POST',
                 data: {
                     username: username,
@@ -79,21 +69,24 @@
                 },
                 success: function(response) {
                     if (response.status === 200) {
+                        // Tambahkan console.log untuk debugging
+                        console.log('Login berhasil:', response.data);
+
                         // Simpan token dan data user
                         localStorage.setItem('token', response.data.token);
                         localStorage.setItem('user_id', response.data.user.id);
                         localStorage.setItem('user_role', response.data.user.role);
 
-                        // Redirect ke dashboard
+                        // Verifikasi token tersimpan
+                        console.log('Token tersimpan:', localStorage.getItem('token'));
+
                         window.location.href = '/dashboard';
                     }
                 },
                 error: function(xhr) {
-                    console.error('Error:', xhr);
-                    const response = xhr.responseJSON;
-                    $('#errorAlert')
-                        .removeClass('hidden')
-                        .text(response?.message || 'Login gagal. Silakan cek kredensial Anda.');
+                    // Handle error
+                    console.error('Login error:', xhr);
+                    alert('Login gagal. Silakan cek username dan password Anda.');
                 }
             });
         });

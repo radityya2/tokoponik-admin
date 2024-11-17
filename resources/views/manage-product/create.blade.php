@@ -124,7 +124,7 @@ $(document).ready(function() {
         formData.append('price', $('#price').val());
         formData.append('description', $('#description').val());
         formData.append('type', $('#type').val());
-        
+
         // Ambil file pertama saja karena backend hanya menerima satu foto
         const photoFile = $('#photos')[0].files[0];
         if (photoFile) {
@@ -132,7 +132,7 @@ $(document).ready(function() {
         }
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/products/store',
+            url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/products/store',
             method: 'POST',
             data: formData,
             processData: false,
@@ -142,6 +142,8 @@ $(document).ready(function() {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
+                console.log('Response:', response); // untuk debugging
+
                 Swal.fire({
                     title: 'Success!',
                     text: 'Product has been successfully added',
@@ -156,7 +158,6 @@ $(document).ready(function() {
             error: function(xhr) {
                 console.error('Error:', xhr);
                 if (xhr.responseJSON && xhr.responseJSON.errors) {
-                    // Tampilkan error validasi
                     const errors = xhr.responseJSON.errors;
                     Object.keys(errors).forEach(key => {
                         const errorMsg = errors[key][0];
@@ -164,7 +165,12 @@ $(document).ready(function() {
                         $(`#${key}`).after(`<p class="text-red-500 text-xs mt-1">${errorMsg}</p>`);
                     });
                 } else {
-                    alert('Gagal menyimpan produk: ' + (xhr.responseJSON?.message || 'Terjadi kesalahan'));
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to save product: ' + (xhr.responseJSON?.message || 'An error occurred'),
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             }
         });
