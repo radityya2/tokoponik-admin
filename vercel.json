@@ -3,17 +3,13 @@
     "api/index.php": { "runtime": "vercel-php@0.6.0"}
 },
 "routes": [
-    { "src": "/build/(.*)", "dest": "/public/build/" },
     { "src": "/(.*)", "dest": "/api/index.php" }
 ],
-"public": true,
-"buildCommand": "composer install --no-dev && npm install && npm run build",
-"outputDirectory": "public",
 "env": {
     "APP_NAME": "Laravel",
     "APP_ENV": "production",
     "APP_DEBUG": "false",
-    "APP_URL": "https://tokoponik-admin-p89y63drp-raditya2s-projects.vercel.app",
+    "APP_URL": "https://tokoponik-admin-g4sx.vercel.app",
     "APP_KEY": "base64:0Y8IwYHrcbOrqCOUIytZmWrKQTC/zG9kFqwPs8sULbA=",
 
     "APP_CONFIG_CACHE": "/tmp/config.php",
@@ -35,7 +31,6 @@
     "DB_PASSWORD": "",
 
     "BASE_URL": "https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net"
-    },
-    "outputDirectory": "public"
+    }
 }
 
