@@ -119,7 +119,7 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     loadUsers();
-                    
+
                 },
                 error: function(xhr) {
                     console.error('Error:', xhr);

@@ -22,7 +22,7 @@
 
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">100</span>
+                    <span class="text-3xl font-bold text-gray-900" id="totalUsers">0</span>
                     <span class="block text-gray-500 text-sm">Total Users</span>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     </svg>
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">100</span>
+                    <span class="text-3xl font-bold text-gray-900" id="totalProducts">0</span>
                     <span class="block text-gray-500 text-sm">Total Products</span>
                 </div>
             </div>
@@ -53,7 +53,7 @@
 
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">100</span>
+                    <span class="text-3xl font-bold text-gray-900" id="totalBlogs">0</span>
                     <span class="block text-gray-500 text-sm">Total Blogs</span>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                     </svg>
                 </div>
                 <div class="text-left">
-                    <span class="text-3xl font-bold text-gray-900">100</span>
+                    <span class="text-3xl font-bold text-gray-900" id="totalTransactions">0</span>
                     <span class="block text-gray-500 text-sm">Total Transaction</span>
                 </div>
             </div>
@@ -84,23 +84,42 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    // Fungsi untuk memformat data transaksi per bulan
+    function processTransactionData(transactions) {
+        let monthlyData = new Array(12).fill(0);
+
+        transactions.forEach(transaction => {
+            const date = new Date(transaction.created_at);
+            const month = date.getMonth(); // 0-11
+            monthlyData[month] += parseFloat(transaction.grand_total);
+        });
+
+        return monthlyData;
+    }
+
+    // Konfigurasi grafik
     var options = {
         series: [{
-            name: '2020',
-            data: [15000, 18000, 16000, 19000, 18000, 20000, 22000, 25000, 23000, 20000, 18000, 19000]
-        }, {
-            name: '2021',
-            data: [12000, 17000, 15000, 19000, 20000, 18000, 21000, 23000, 24000, 21000, 16000, 20000]
+            name: 'Total Transaksi',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // Default values
         }],
         chart: {
             height: 300,
             type: 'line',
             toolbar: {
                 show: false
-            }
+            },
+            locales: [{
+                name: 'id',
+                options: {
+                    months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+                }
+            }],
+            defaultLocale: 'id'
         },
-        colors: ['#60A5FA', '#F87171'],
+        colors: ['#006838'],
         dataLabels: {
             enabled: false
         },
@@ -112,23 +131,128 @@
             borderColor: '#E5E7EB',
         },
         xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
         },
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return '$' + value.toLocaleString();
+                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
                 }
             }
         },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'right'
+        tooltip: {
+            y: {
+                formatter: function(value) {
+                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                }
+            }
         }
     };
 
+    // Inisialisasi grafik
     var chart = new ApexCharts(document.querySelector("#transactionChart"), options);
     chart.render();
+
+    // Memuat data transaksi dari API
+    $(document).ready(function() {
+        const token = localStorage.getItem('token');
+
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/auth/transactions',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json'
+            },
+            success: function(response) {
+                if (response.data) {
+                    const monthlyData = processTransactionData(response.data);
+                    chart.updateSeries([{
+                        name: 'Total Transaksi',
+                        data: monthlyData
+                    }]);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr);
+            }
+        });
+
+        $.ajax({
+        url: 'http://127.0.0.1:8000/api/auth/users',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+        },
+        success: function(response) {
+            if (response.data) {
+                $('#totalUsers').text(response.data.length);
+            }
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr);
+            $('#totalUsers').text('0');
+        }
+    });
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/products',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+        },
+        success: function(response) {
+            console.log('Products response:', response);
+            if (response.data) {
+                $('#totalProducts').text(response.data.length);
+            }
+        },
+        error: function(xhr) {
+            console.error('Products error:', xhr);
+            $('#totalProducts').text('0');
+        }
+    });
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/auth/blogs',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+        },
+        success: function(response) {
+            if (response.data) {
+                $('#totalBlogs').text(response.data.length);
+            }
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr);
+            $('#totalBlogs').text('0');
+        }
+    });
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/auth/transactions',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+        },
+        success: function(response) {
+            if (response.data) {
+                $('#totalTransactions').text(response.data.length);
+            }
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr);
+            $('#totalTransactions').text('0');
+        }
+    });
+
+
+    });
 </script>
 @endpush
 @endsection

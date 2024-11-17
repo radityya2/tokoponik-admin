@@ -34,110 +34,234 @@
                     <th class="py-4 px-6 text-left font-medium">Action</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
-                @if($transactions->count() != 0)
-                    @foreach($transactions as $transaction)
-                    <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
-                        <td class="py-4 px-6">{{ $loop->iteration }}</td>
-                        <td class="py-4 px-6">{{ $transaction->user->name }}</td>
-                        <td class="py-4 px-6">{{ $transaction->bank->owner_name }}</td>
-                        <td class="py-4 px-6">Rp {{ number_format($transaction->grand_total) }}</td>
-                        <td class="py-4 px-6">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium
-                                {{ strtolower($transaction->status) === 'belum dibayar' ? 'bg-gray-100 text-gray-700' :
-                                    (strtolower($transaction->status) === 'menunggu verifikasi' ? 'bg-yellow-500 text-white' :
-                                    (strtolower($transaction->status) === 'sedang dikemas' ? 'bg-yellow-100 text-yellow-700' :
-                                    (strtolower($transaction->status) === 'sedang dikirim' ? 'bg-blue-100 text-blue-700' :
-                                    (strtolower($transaction->status) === 'selesai' ? 'bg-emerald-100 text-emerald-700' :
-                                    (strtolower($transaction->status) === 'dibatalkan' ? 'bg-red-100 text-red-700' : 'bg-primary-500 text-white'))))) }}">
-                                {{ str_replace('_', ' ', $transaction->status) }}
-                            </span>
-                        </td>
-                        <td class="py-4 px-6">
-                            <button onclick="showProof('{{ Storage::url($transaction->proof) }}')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
-                                <i class="bi bi-search text-sm" style="margin-right: 0.25rem;"></i>
-                                Proof of Payment
-                            </button>
-                        </td>
-
-<!-- Tambahkan div untuk menampilkan gambar bukti pembayaran -->
-<div id="proofModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-    <img id="proofImage" class="max-w-full max-h-full" src="" alt="Proof of Payment">
-    <i onclick="closeProof()" class=" bi bi-x absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded"></i>
-</div>
-
-<script>
-    function showProof(imageUrl) {
-        const proofModal = document.getElementById('proofModal');
-        const proofImage = document.getElementById('proofImage');
-        proofImage.src = imageUrl;
-        proofModal.classList.remove('hidden');
-    }
-
-    function closeProof() {
-        const proofModal = document.getElementById('proofModal');
-        proofModal.classList.add('hidden');
-    }
-
-    function updateStatus(transactionId, status) {
-        console.log('Transaction ID:', transactionId);
-        console.log('New Status:', status);
-        fetch(`{{ url('transaction/updateStatus') }}/${transactionId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ status: status })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Status updated successfully');
-            } else {
-                console.error('Error updating status');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    document.querySelectorAll('select[name="status"]').forEach(select => {
-        select.addEventListener('change', function() {
-            const transactionId = this.closest('tr').querySelector('td:first-child').textContent; // Ambil ID transaksi dari kolom No
-            const status = this.value;
-            updateStatus(transactionId, status);
-        });
-    });
-</script>
-                        <td class="py-4 px-6">
-                            <div class="flex items-center space-x-3">
-                                <div id="dropdown-{{ $transaction->id }}" class="relative">
-                                    <select name="status" onchange="updateStatus({{ $transaction->id }}, this.value)" class="block w-full px-4 py-2 text-sm text-gray-700 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 hover:bg-gray-200">
-                                        <option value="belum dibayar" {{ $transaction->status === 'belum dibayar' ? 'selected' : '' }}>Belum Dibayar</option>
-                                        <option value="dikemas" {{ $transaction->status === 'dikemas' ? 'selected' : '' }}>Dikemas</option>
-                                        <option value="dikirim" {{ $transaction->status === 'dikirim' ? 'selected' : '' }}>Dikirim</option>
-                                        <option value="selesai" {{ $transaction->status === 'selesai' ? 'selected' : '' }}>Selesai</option>
-                                        <option value="dibatalkan" {{ $transaction->status === 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                                    </select>
-                                </div>
-                                <a href="{{ route('transaction.destroy', $transaction->id) }}"
-                                   onclick="return confirm('Yakin ingin menghapus?')"
-                                   class="text-red-500 hover:text-red-700 transition duration-200"
-                                   title="Delete Transaction">
-                                    <i class="bi bi-trash3-fill text-xl"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="7" class="text-center py-8 text-gray-500">No data exists</td>
-                    </tr>
-                @endif
+            <tbody id="transactionTableBody" class="divide-y divide-gray-100">
+                <!-- Data akan diisi melalui AJAX -->
             </tbody>
         </table>
-        {{ $transactions->links() }}
+
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(document).ready(function() {
+    function loadTransactions() {
+        const token = localStorage.getItem('token');
+
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/auth/transactions',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json'
+            },
+            success: function(response) {
+                console.log('Seluruh response:', response);
+                var tbody = $('#transactionTableBody');
+                tbody.empty();
+
+                if (response.data && response.data.length > 0) {
+                    response.data.forEach(function(transaction, index) {
+                        console.log('Data transaksi:', transaction);
+                        console.log('Data user:', transaction.user);
+
+                        var username = transaction.user ? transaction.user.username : '-';
+
+                        var row = `
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+                                <td class="py-4 px-6">${index + 1}</td>
+                                <td class="py-4 px-6">${username}</td>
+                                <td class="py-4 px-6">${transaction.bank?.bank_name || '-'}</td>
+                                <td class="py-4 px-6">Rp ${formatNumber(transaction.grand_total)}</td>
+                                <td class="py-4 px-6">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(transaction.status)}">
+                                        ${transaction.status}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <button onclick="showProof('${transaction.proof}')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
+                                        <i class="bi bi-search text-sm" style="margin-right: 0.25rem;"></i>
+                                        Proof of Payment
+                                    </button>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="relative">
+                                            <select name="status" onchange="updateStatus(${transaction.id}, this.value)"
+                                                class="block w-full px-4 py-2 text-sm text-gray-700 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 hover:bg-gray-200">
+                                                <option value="belum dibayar" ${transaction.status === 'belum dibayar' ? 'selected' : ''}>Belum Dibayar</option>
+                                                <option value="waiting for verification" ${transaction.status === 'waiting for verification' ? 'selected' : ''}>Waiting for Verification</option>
+                                                <option value="dikemas" ${transaction.status === 'dikemas' ? 'selected' : ''}>Dikemas</option>
+                                                <option value="dikirim" ${transaction.status === 'dikirim' ? 'selected' : ''}>Dikirim</option>
+                                                <option value="selesai" ${transaction.status === 'selesai' ? 'selected' : ''}>Selesai</option>
+                                                <option value="dibatalkan" ${transaction.status === 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
+                                            </select>
+                                        </div>
+                                        ${transaction.proof ? '' : `
+                                            <button onclick="addProof(${transaction.id})"
+                                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
+                                                <i class="bi bi-upload"></i> Add Proof
+                                            </button>
+                                        `}
+                                        <a href="javascript:void(0)" onclick="deleteTransaction(${transaction.id})"
+                                           class="text-red-500 hover:text-red-700 transition duration-200"
+                                           title="Delete Transaction">
+                                            <i class="bi bi-trash3-fill text-xl"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                } else {
+                    tbody.html('<tr><td colspan="7" class="text-center py-8 text-gray-500">No data exists</td></tr>');
+                }
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr);
+                if (xhr.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                } else {
+                    $('#transactionTableBody').html('<tr><td colspan="7" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
+                }
+            }
+        });
+    }
+
+    // Fungsi format angka
+    function formatNumber(number) {
+        return new Intl.NumberFormat('id-ID').format(number);
+    }
+
+    // Fungsi untuk mendapatkan class status
+    function getStatusClass(status) {
+        const statusClasses = {
+            'belum dibayar': 'bg-red-500 text-white',
+            'dikemas': 'bg-yellow-500 text-white',
+            'dikirim': 'bg-blue-500 text-white',
+            'selesai': 'bg-green-500 text-white',
+            'dibatalkan': 'bg-gray-500 text-white'
+        };
+        return statusClasses[status] || 'bg-gray-500 text-white';
+    }
+
+    // Tambahkan fungsi untuk menampilkan proof
+    window.showProof = function(proofPath) {
+        if (!proofPath) {
+            Swal.fire({
+                title: 'Info',
+                text: 'No proof of payment uploaded yet',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Proof of Payment',
+            imageUrl: `/storage/${proofPath}`,
+            imageWidth: 400,
+            imageHeight: 400,
+            imageAlt: 'Proof of Payment Image',
+            confirmButtonText: 'Close'
+        });
+    };
+
+    // Fungsi untuk update status
+    window.updateStatus = function(transactionId, newStatus) {
+        const token = localStorage.getItem('token');
+
+        $.ajax({
+            url: `http://127.0.0.1:8000/api/auth/transactions/${transactionId}/update-status`,
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
+                status: newStatus
+            }),
+            success: function(response) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Transaction status has been successfully updated',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        loadTransactions(); // Reload data setelah update
+                    }
+                });
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr);
+                Swal.fire({
+                    title: 'Error!',
+                    text: xhr.responseJSON?.message || 'Failed to update transaction status',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    };
+
+    // Fungsi untuk menghapus transaksi
+    window.deleteTransaction = function(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this transaction!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const token = localStorage.getItem('token');
+
+                $.ajax({
+                    url: `http://127.0.0.1:8000/api/auth/transactions/${id}/destroy`,
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'Transaction has been successfully deleted',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                loadTransactions(); // Reload data setelah hapus
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: xhr.responseJSON?.message || 'Failed to delete transaction',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            }
+        });
+    };
+
+    // Load data transactions saat halaman dimuat
+    loadTransactions();
+});
+</script>
+@endpush
+

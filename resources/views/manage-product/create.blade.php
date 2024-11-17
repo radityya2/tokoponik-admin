@@ -21,7 +21,7 @@
             <h1 class="text-gray-800 text-2xl font-bold mb-4">Form Add Product</h1>
         </div>
 
-        <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data" id="create-user">
+        <form id="createProductForm" enctype="multipart/form-data">
             @csrf
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="name">Name</label>
@@ -67,6 +67,17 @@
                 @enderror
             </div>
 
+            <div class="mb-6">
+                <label class="block text-gray-800 text-sm font-semibold mb-3" for="photos">Picture</label>
+                <input type="file"
+                    class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="photos"
+                    name="photos[]"
+                    accept="image/*"
+                    multiple>
+                <div id="preview" class="mt-2 flex flex-wrap gap-2"></div>
+            </div>
+
             <div class="mb-8">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="type">Type</label>
                 <select class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('type') border-red-500 @enderror"
@@ -101,38 +112,43 @@
 @endsection
 
 @push('scripts')
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function(){
-        $("#create-user").submit(function(event){
-            event.preventDefault(); // Mencegah form dari submit default
+$(document).ready(function() {
+    $('#createProductForm').on('submit', function(e) {
+        e.preventDefault();
 
-            // Mengambil data dari form
-            var formData = new FormData(this);
+        const formData = new FormData(this);
 
-            // Mengirim data menggunakan AJAX
-            $.ajax({
-                url: 'http://127.0.0.1:8000/api/products/store',
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-
-
-                    // Pindah ke halaman index setelah sukses
-                    window.location.href = "{{ route('product.index') }}"; // Ganti dengan URL index produk
-                },
-                error: function(xhr) {
-                    // Tindakan jika terjadi kesalahan
-                    var errors = xhr.responseJSON.errors;
-                    var errorMessage = '';
-                    for (var key in errors) {
-                        errorMessage += errors[key].join(', ') + '\n';
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/products/store',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Product has been successfully added',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('product.index') }}";
                     }
-                    alert('Terjadi kesalahan:\n' + errorMessage);
-                }
-            });
+                });
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr);
+                alert('Gagal menyimpan produk');
+            }
         });
     });
+});
 </script>
+@endpush

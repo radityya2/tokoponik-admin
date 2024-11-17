@@ -1,13 +1,11 @@
 @extends('layout')
 
 @section('title')
-Edit Address of {{ $query->receiver_name }}
+Edit Address
 @endsection
 
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="{{ route('user.index') }}" class="text-green-600 hover:text-green-800">Data User</a></li>
-<li class="breadcrumb-item"><a href="{{ route('address.index', $query->user_id) }}" class="text-green-600 hover:text-green-800">Data Address of {{ $query->user->name }}</a></li>
-<li class="breadcrumb-item active">Edit Address of {{ $query->receiver_name }}</li>
+<li class="breadcrumb-item active">Edit Address</li>
 @endsection
 
 @section('content')
@@ -15,71 +13,49 @@ Edit Address of {{ $query->receiver_name }}
         <div class="border-b border-gray-200 mb-6">
             <p class="text-gray-800 text-2xl font-bold mb-3">Form Edit Address</p>
         </div>
-        <form action="{{ route('address.update', $query->id) }}" method="POST" enctype="multipart/form-data">
+        <form id="addressForm" action="javascript:void(0)" method="POST">
             @csrf
-            @method('PUT')
 
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="receiver_name">Receiver Name</label>
-                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('receiver_name') border-red-500 @enderror"
-                    id="receiver_name" name="receiver_name" value="{{ $query->receiver_name }}">
-                @error('receiver_name')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="receiver_name" name="receiver_name">
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="address">Address</label>
-                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('address') border-red-500 @enderror"
-                    id="address" name="address" value="{{ $query->address }}">
-                @error('address')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="address" name="address">
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="note">Note</label>
-                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('note') border-red-500 @enderror"
-                    id="note" name="note" value="{{ $query->note }}">
-                @error('note')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="note" name="note">
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="province">Province</label>
-                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('province') border-red-500 @enderror"
-                    id="province" name="province" value="{{ $query->province }}">
-                @error('province')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="province" name="province">
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="district">District</label>
-                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('district') border-red-500 @enderror"
-                    id="district" name="district" value="{{ $query->district }}">
-                @error('district')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="district" name="district">
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="subdistrict">Subdistrict</label>
-                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('subdistrict') border-red-500 @enderror"
-                    id="subdistrict" name="subdistrict" value="{{ $query->subdistrict }}">
-                @error('subdistrict')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <input type="text" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="subdistrict" name="subdistrict">
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="postcode">Postcode</label>
-                <input type="number" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('postcode') border-red-500 @enderror"
-                    id="postcode" name="postcode" value="{{ $query->postcode }}">
-                @error('postcode')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+                <input type="number" class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="postcode" name="postcode">
             </div>
 
             <div class="flex gap-3">
@@ -89,15 +65,117 @@ Edit Address of {{ $query->receiver_name }}
                     </svg>
                     Submit
                 </button>
-                <a href="{{ route('address.index', $query->user_id) }}">
-                    <button type="button" class="flex items-center px-6 py-2.5 bg-red-700 text-white rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                        </svg>
-                        Back
-                    </button>
-                </a>
+                <button type="button" onclick="window.history.back()" class="flex items-center px-6 py-2.5 bg-red-700 text-white rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back
+                </button>
             </div>
         </form>
     </div>
 @endsection
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(document).ready(function() {
+    // Ambil ID dari URL
+    const pathArray = window.location.pathname.split('/');
+    const addressId = pathArray[2]; // Mengambil ID dari URL /address/{id}/edit
+    let userId; // Deklarasi userId untuk digunakan nanti
+
+    // Fetch data alamat yang akan diedit
+    $.ajax({
+        type: 'GET',
+        url: `http://127.0.0.1:8000/api/auth/addresses/${addressId}`,
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        success: function(response) {
+            // Simpan user_id dari response
+            userId = response.data.user_id;
+
+            // Isi form dengan data yang ada
+            $('#receiver_name').val(response.data.receiver_name);
+            $('#address').val(response.data.address);
+            $('#note').val(response.data.note);
+            $('#province').val(response.data.province);
+            $('#district').val(response.data.district);
+            $('#subdistrict').val(response.data.subdistrict);
+            $('#postcode').val(response.data.post_code);
+        },
+        error: function(xhr) {
+            console.log('Error:', xhr);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Gagal mengambil data alamat',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+
+    $('#addressForm').on('submit', function(e) {
+        e.preventDefault();
+
+        let formData = {
+            receiver_name: $('#receiver_name').val(),
+            address: $('#address').val(),
+            note: $('#note').val(),
+            province: $('#province').val(),
+            district: $('#district').val(),
+            subdistrict: $('#subdistrict').val(),
+            post_code: $('#postcode').val()
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: `http://127.0.0.1:8000/api/auth/addresses/${addressId}/update`,
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            },
+            success: function(response) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Address has been successfully updated',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `/address/${userId}`;
+                    }
+                });
+            },
+            error: function(xhr) {
+                console.log('Error:', xhr);
+
+                // Hapus pesan error sebelumnya
+                $('.text-red-500').remove();
+                $('.border-red-500').removeClass('border-red-500');
+
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    let errors = xhr.responseJSON.errors;
+                    $.each(errors, function(key, value) {
+                        $(`#${key}`).addClass('border-red-500');
+                        $(`#${key}`).after(`<p class="text-red-500 text-xs mt-1">${value[0]}</p>`);
+                    });
+                }
+
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan saat memperbarui alamat',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    });
+});
+</script>

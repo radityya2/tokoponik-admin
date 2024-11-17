@@ -109,6 +109,7 @@
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     $('form').on('submit', function(e) {
@@ -133,9 +134,16 @@ $(document).ready(function() {
             },
             data: JSON.stringify(formData),
             success: function(response) {
-
-                window.location.href = "{{ route('user.index') }}";
-
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'User has been successfully added',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('user.index') }}";
+                    }
+                });
             },
             error: function(xhr) {
                 const response = xhr.responseJSON;

@@ -42,6 +42,30 @@
             </div>
 
             <div class="mb-6">
+                <label class="block text-gray-800 text-sm font-semibold mb-3" for="password">Password</label>
+                <input type="password"
+                    class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('password') border-red-500 @enderror"
+                    id="password"
+                    name="password"
+                    placeholder="Leave empty if you don't want to change the password">
+                @error('password')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-800 text-sm font-semibold mb-3" for="password_confirmation">Password Confirmation</label>
+                <input type="password"
+                    class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 @error('password_confirmation') border-red-500 @enderror"
+                    id="password_confirmation"
+                    name="password_confirmation"
+                    placeholder="Re-enter new password">
+                @error('password_confirmation')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-6">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="phone_number">Phone Number</label>
                 <div class="flex">
                     <span class="inline-flex items-center px-4 py-2.5 text-gray-700 bg-gray-100 border border-r-0 rounded-l-lg font-medium">+62</span>
@@ -93,6 +117,7 @@
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     const userId = window.location.pathname.split('/')[2];
@@ -110,6 +135,7 @@ $(document).ready(function() {
             if (response.data) {
                 $('#name').val(response.data.name || '');
                 $('#username').val(response.data.username || '');
+                $('#password').val(response.data.password || '');
                 $('#phone_number').val(response.data.phone_number || '');
                 $('#role').val(response.data.role || '');
             }
@@ -135,8 +161,13 @@ $(document).ready(function() {
             username: $('#username').val(),
             phone_number: phoneNumber,
             role: $('#role').val(),
-            
         };
+
+        // Add password only if it's filled
+        if ($('#password').val()) {
+            formData.password = $('#password').val();
+            formData.password_confirmation = $('#password_confirmation').val();
+        }
 
         const submitBtn = $(this).find('button[type="submit"]');
         const originalText = submitBtn.text();
@@ -154,8 +185,17 @@ $(document).ready(function() {
             data: JSON.stringify(formData),
             success: function(response) {
                 console.log('Success:', response);
-                alert('Data berhasil diperbarui');
-                window.location.href = "{{ route('user.index') }}";
+
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'User has been successfully updated',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('user.index') }}";
+                    }
+                });
             },
             error: function(xhr) {
                 submitBtn.prop('disabled', false).text(originalText);

@@ -67,20 +67,47 @@ $(document).ready(function() {
 
                 if (response.data && response.data.length > 0) {
                     response.data.forEach(function(blog, index) {
+                        // Ambil gambar pertama jika ada
+                        let imagePath = '-';
+                        if (blog.blog_pics && blog.blog_pics.length > 0) {
+                            // Ambil path dari API
+                            const picPath = blog.blog_pics[0].pic_path;
+                            // Hapus URL lengkap jika ada
+                            const cleanPath = picPath.replace(/^https?:\/\/[^\/]+\//, '');
+                            // Gunakan URL yang benar
+                            imagePath = cleanPath;
+                            console.log('Clean image path:', imagePath);
+                        }
+
                         var row = `
                             <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
                                 <td class="py-4 px-6">${index + 1}</td>
                                 <td class="py-4 px-6">${blog.title || '-'}</td>
                                 <td class="py-4 px-6">${blog.description || '-'}</td>
-                                <td class="py-4 px-6">${blog.blog_picture || '-'}</td>
-                                <td class="py-4 px-6">${blog.blog_link || '-'}</td>
                                 <td class="py-4 px-6">
-                                    <div class="flex items-center space-x-3">
-                                        <a href="javascript:void(0)" onclick="editBlog(${blog.id})" class="tooltip" title="Edit Blog">
-                                            <i class="bi bi-pencil-square text-xl text-forest-500 hover:text-yellow-500 transition duration-200"></i>
+                                    ${imagePath !== '-'
+                                        ? `<img src="${imagePath}"
+                                             alt="Blog Image"
+                                             class="w-20 h-20 object-cover rounded-lg"
+                                             onerror="console.error('Failed to load image:', this.src); this.style.display='none';">`
+                                        : '-'}
+                                </td>
+                                <td class="py-4 px-6">
+                                    ${blog.blog_links && blog.blog_links.length > 0
+                                        ? `<a href="${blog.blog_links[0].link}" target="_blank" class="text-blue-500 hover:text-blue-700 underline">
+                                            <i class="bi bi-link-45deg"></i> Link Blog
+                                           </a>`
+                                        : '-'}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="flex gap-2">
+                                        <a href="javascript:void(0)" onclick="editBlog(${blog.id})"
+                                           class="text-forest-500 hover:text-yellow-700 transition duration-200">
+                                            <i class="bi bi-pencil-square text-xl"></i>
                                         </a>
-                                        <a href="javascript:void(0)" onclick="deleteBlog(${blog.id})" class="tooltip" title="Delete Blog">
-                                            <i class="bi bi-trash3-fill text-xl text-red-500 hover:text-red-700 transition duration-200"></i>
+                                        <a href="javascript:void(0)" onclick="deleteBlog(${blog.id})"
+                                           class="text-red-500 hover:text-red-700 transition duration-200">
+                                            <i class="bi bi-trash3-fill text-xl"></i>
                                         </a>
                                     </div>
                                 </td>

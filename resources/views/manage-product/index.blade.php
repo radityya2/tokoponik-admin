@@ -33,6 +33,7 @@
                 <thead>
                     <tr class="bg-forest-500 text-white text-sm">
                         <th class="py-4 px-6 text-left font-medium">No</th>
+                        <th class="py-4 px-6 text-left font-medium">Image</th>
                         <th class="py-4 px-6 text-left font-medium">Name</th>
                         <th class="py-4 px-6 text-left font-medium">Price</th>
                         <th class="py-4 px-6 text-left font-medium">Description</th>
@@ -56,19 +57,35 @@
             $.ajax({
                 url: 'http://127.0.0.1:8000/api/products',
                 method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                },
                 success: function(response) {
+                    console.log('Response:', response); // Debug log
                     var tbody = $('#productTable tbody');
                     tbody.empty();
 
                     if (response.data && response.data.length > 0) {
                         response.data.forEach(function(product, index) {
+                            console.log('Processing product:', product); // Debug log
+
+                            const imagePath = product.product_pics && product.product_pics.length > 0
+                                ? product.product_pics[0].path
+                                : null;
+
+                            console.log('Image path:', imagePath); // Debug log
+
                             var row = `
                                 <tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
                                     <td class="py-4 px-6">${index + 1}</td>
-                                    <td class="py-4 px-6 text-sm">${product.name || '-'}</td>
+                                    <td class="py-4 px-6">
+                                        ${imagePath
+                                            ? `<img src="${imagePath}" alt="${product.name}"
+                                                 class="h-16 w-16 object-cover rounded"
+                                                 onerror="this.onerror=null; this.src='/storage/photos/default.jpg';">`
+                                            : `<div class="h-16 w-16 bg-gray-200 rounded flex items-center justify-center">
+                                                <span class="text-gray-500 text-xs">No image</span>
+                                               </div>`
+                                        }
+                                    </td>
+                                    <td class="py-4 px-6">${product.name || '-'}</td>
                                     <td class="py-4 px-6">Rp ${formatNumber(product.price || 0)}</td>
                                     <td class="py-4 px-6">${product.description || '-'}</td>
                                     <td class="py-4 px-6">
@@ -78,10 +95,10 @@
                                     </td>
                                     <td class="py-4 px-6">
                                         <div class="flex items-center space-x-3">
-                                            <a href="#" onclick="editProduct(${product.id})" class="text-blue-500 hover:text-blue-800 transition duration-200" title="Edit Product">
+                                            <button onclick="editProduct(${product.id})" class="text-blue-500 hover:text-blue-700">
                                                 <i class="bi bi-pencil-square text-xl"></i>
-                                            </a>
-                                            <button onclick="deleteProduct(${product.id})" class="text-red-500 hover:text-red-700 transition duration-200" title="Delete Product">
+                                            </button>
+                                            <button onclick="deleteProduct(${product.id})" class="text-red-500 hover:text-red-700">
                                                 <i class="bi bi-trash3-fill text-xl"></i>
                                             </button>
                                         </div>
@@ -91,12 +108,12 @@
                             tbody.append(row);
                         });
                     } else {
-                        tbody.html('<tr><td colspan="6" class="text-center py-8 text-gray-500">Tidak ada data</td></tr>');
+                        tbody.html('<tr><td colspan="7" class="text-center py-4">Tidak ada data produk</td></tr>');
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    $('#productTable tbody').html('<tr><td colspan="6" class="text-center py-8 text-red-500">Error saat memuat data</td></tr>');
+                error: function(xhr) {
+                    console.error('Error:', xhr);
+                    $('#productTable tbody').html('<tr><td colspan="7" class="text-center py-4 text-red-500">Error saat memuat data</td></tr>');
                 }
             });
         }
@@ -108,8 +125,8 @@
 
             $("#productTable tbody tr").each(function() {
                 var row = $(this);
-                var name = row.find("td:eq(1)").text().toLowerCase();
-                var type = row.find("td:eq(4)").text().trim().toLowerCase();
+                var name = row.find("td:eq(2)").text().toLowerCase();
+                var type = row.find("td:eq(5)").text().trim().toLowerCase();
 
                 var matchSearch = name.includes(searchValue);
                 var matchType = typeValue === "" || type.includes(typeValue);

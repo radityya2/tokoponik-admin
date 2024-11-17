@@ -58,6 +58,19 @@
                 <span id="descriptionError" class="text-red-500 text-xs mt-1"></span>
             </div>
 
+            <div class="mb-6">
+                <label class="block text-gray-800 text-sm font-semibold mb-3" for="photos">Foto Produk</label>
+                <input type="file"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    id="photos"
+                    name="photos[]"
+                    accept="image/jpeg,png,jpg"
+                    multiple>
+                <div id="existingImages" class="mt-2 flex flex-wrap gap-2"></div>
+                <div id="preview" class="mt-2 flex flex-wrap gap-2"></div>
+                <span id="photosError" class="text-red-500 text-xs mt-1"></span>
+            </div>
+
             <div class="mb-8">
                 <label class="block text-gray-800 text-sm font-semibold mb-3" for="type">Type</label>
                 <select class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -91,6 +104,7 @@
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     const productId = window.location.pathname.split('/')[2];
@@ -109,6 +123,21 @@ $(document).ready(function() {
                 $('#price').val(response.data.price || '');
                 $('#description').val(response.data.description || '');
                 $('#type').val(response.data.type || '');
+                const existingImages = document.getElementById('existingImages');
+                if (response.data.product_pics) {
+                    response.data.product_pics.forEach(pic => {
+                        const div = document.createElement('div');
+                        div.className = 'relative';
+                        div.innerHTML = `
+                            <img src="${pic.path}" class="h-20 w-20 object-cover rounded">
+                            <button type="button" onclick="deleteImage(${pic.id})"
+                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                                ×
+                            </button>
+                        `;
+                        existingImages.appendChild(div);
+                    });
+                }
             }
         },
         error: function(xhr, status, error) {
@@ -144,7 +173,16 @@ $(document).ready(function() {
             data: JSON.stringify(formData),
             success: function(response) {
                 console.log('Success:', response);
-                window.location.href = '{{ route("product.index") }}';
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Product has been successfully updated',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('product.index') }}";
+                    }
+                });
             },
             error: function(xhr, status, error) {
                 submitBtn.prop('disabled', false).text(originalText);

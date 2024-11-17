@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - Admin Dashboard</title>
     @vite('resources/css/app.css')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -59,25 +60,40 @@
             const username = $('#username').val();
             const password = $('#password').val();
 
+            // Reset error message
+            $('#errorAlert').addClass('hidden').text('');
+
+            // Tambahkan header CSRF
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
             $.ajax({
                 url: 'http://127.0.0.1:8000/api/login',
                 method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
+                data: {
                     username: username,
                     password: password
-                }),
+                },
                 success: function(response) {
                     if (response.status === 200) {
+                        // Simpan token dan data user
                         localStorage.setItem('token', response.data.token);
+                        localStorage.setItem('user_id', response.data.user.id);
+                        localStorage.setItem('user_role', response.data.user.role);
+
+                        // Redirect ke dashboard
                         window.location.href = '/dashboard';
                     }
                 },
                 error: function(xhr) {
+                    console.error('Error:', xhr);
                     const response = xhr.responseJSON;
                     $('#errorAlert')
-                        .text(response?.message || 'Login gagal. Silakan cek kredensial Anda.')
-                        .removeClass('hidden');
+                        .removeClass('hidden')
+                        .text(response?.message || 'Login gagal. Silakan cek kredensial Anda.');
                 }
             });
         });
