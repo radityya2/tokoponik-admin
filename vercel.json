@@ -1,10 +1,11 @@
 {
     "version": 2,
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.6.0"
+        }
+    },
     "builds": [
-        {
-            "src": "public/**",
-            "use": "@vercel/static"
-        },
         {
             "src": "api/index.php",
             "use": "@vercel/php"
@@ -13,7 +14,7 @@
     "routes": [
         {
             "src": "/(css|js|images|fonts|build)/(.*)",
-            "dest": "public/$1/$2"
+            "dest": "/public/$1/$2"
         },
         {
             "src": "/(.*)",
@@ -24,7 +25,7 @@
         "APP_NAME": "Laravel",
         "APP_ENV": "production",
         "APP_DEBUG": "true",
-        "APP_URL": "https://tokoponik-admin-8025wp28o-raditya2s-projects.vercel.app",
+        "APP_URL": "https://tokoponik-admin.vercel.app",
         "APP_KEY": "base64:0Y8IwYHrcbOrqCOUIytZmWrKQTC/zG9kFqwPs8sULbA=",
 
         "APP_CONFIG_CACHE": "/tmp/config.php",
