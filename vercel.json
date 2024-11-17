@@ -7,13 +7,13 @@
     { "src": "/(.*)", "dest": "/api/index.php" }
 ],
 "public": true,
-"buildCommand": "composer install --no-dev && php artisan config:cache && vite build",
+"buildCommand": "npm install && npm run build",
 "outputDirectory": "public",
 "env": {
     "APP_NAME": "Laravel",
     "APP_ENV": "production",
     "APP_DEBUG": "false",
-    "APP_URL": "https://tokoponik-admin-jzz6desrj-raditya2s-projects.vercel.app",
+    "APP_URL": "https://tokoponik-admin-8qm5ezay0-raditya2s-projects.vercel.app",
     "APP_KEY": "base64:0Y8IwYHrcbOrqCOUIytZmWrKQTC/zG9kFqwPs8sULbA=",
 
     "APP_CONFIG_CACHE": "/tmp/config.php",
