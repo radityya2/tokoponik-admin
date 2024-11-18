@@ -6,7 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - Admin Dashboard</title>
     @vite('resources/css/app.css')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body class="bg-pastel-50">
     <div class="min-h-screen flex items-center justify-center">
@@ -14,7 +13,7 @@
             <!-- Logo dan Judul -->
             <div class="text-center mb-8">
                 <div class="flex items-center justify-center gap-3 mb-6">
-                    <div class="bg-forest-700 p-2 rounded-lg">
+                    <div class="bg-white p-2 rounded-lg border-2 border-forest-500">
                         <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="w-8 h-8">
                     </div>
                     <span class="text-2xl font-bold text-forest-700">Tokoponik</span>
@@ -24,69 +23,81 @@
             </div>
 
             <!-- Form Login -->
-            <form id="loginForm" class="space-y-6">
+            <form id="loginForm" class="space-y-4">
                 <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input type="text" id="username" name="username" required
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-forest-500"
-                        placeholder="Enter your username">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-forest-500" required>
                 </div>
 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input type="password" id="password" name="password" required
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-forest-500"
-                        placeholder="Enter your password">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-forest-500" required>
                 </div>
 
-                <div>
-                    <button type="submit"
-                        class="w-full bg-forest-700 text-white py-2.5 rounded-lg hover:bg-forest-800 focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2 transition-colors duration-200">
-                        Sign in
-                    </button>
-                </div>
+                <div id="errorAlert" class="hidden p-4 text-red-500 bg-red-100 rounded-lg"></div>
+
+                <button type="submit" class="w-full bg-forest-700 text-white py-2 rounded-lg hover:bg-forest-800">
+                    Sign in
+                </button>
             </form>
-
-            <!-- Alert untuk error -->
-            <div id="errorAlert" class="hidden mt-4 p-4 rounded-lg bg-red-100 text-red-700 text-sm"></div>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
     $(document).ready(function() {
-        $('#loginForm').on('submit', function(e) {
-            e.preventDefault();
+        $('#loginForm').on('submit', function(event) {
+            event.preventDefault();
 
             const username = $('#username').val();
             const password = $('#password').val();
 
+            // Reset error state
+            $('#errorAlert').addClass('hidden');
+            $('input').removeClass('border-red-500');
+
+            // Validasi sederhana
+            if (!username || !password) {
+                $('#errorAlert').removeClass('hidden').text('Username dan password harus diisi');
+                return;
+            }
+
             $.ajax({
                 url: 'https://restapi-tokoponik-aqfsagdnfph3cgd8.australiaeast-01.azurewebsites.net/api/login',
                 method: 'POST',
-                data: {
+                contentType: 'application/json',
+                data: JSON.stringify({
                     username: username,
                     password: password
-                },
+                }),
                 success: function(response) {
                     if (response.status === 200) {
-                        // Tambahkan console.log untuk debugging
-                        console.log('Login berhasil:', response.data);
-
-                        // Simpan token dan data user
+                        // Simpan token dan user_id ke localStorage
                         localStorage.setItem('token', response.data.token);
                         localStorage.setItem('user_id', response.data.user.id);
-                        localStorage.setItem('user_role', response.data.user.role);
 
-                        // Verifikasi token tersimpan
-                        console.log('Token tersimpan:', localStorage.getItem('token'));
-
-                        window.location.href = '/dashboard';
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Login Berhasil!',
+                            text: response.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            window.location.href = '/dashboard';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Login Gagal!',
+                            text: response.message,
+                            showConfirmButton: true
+                        });
                     }
                 },
-                error: function(xhr) {
-                    // Handle error
-                    console.error('Login error:', xhr);
-                    alert('Login gagal. Silakan cek username dan password Anda.');
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while logging in.');
                 }
             });
         });
